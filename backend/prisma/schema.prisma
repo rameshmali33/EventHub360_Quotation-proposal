@@ -1,0 +1,500 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------
+// FOUNDATION & STUBS
+// ---------------------------------------------------------
+
+model Tenant {
+  tenant_id  BigInt   @id @default(autoincrement())
+  name       String   @db.VarChar(150)
+  subdomain  String   @unique @db.VarChar(80)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  users           UserAccount[]
+  roles           Role[]
+  companies       Company[]
+  branches        Branch[]
+  permissions     Permission[]
+  tax_rules       TaxRule[]
+  quotations      Quotation[]
+  quotation_lines QuotationLine[]
+  price_books     PriceBook[]
+  rate_cards      RateCard[]
+  packages        Package[]
+  approvals       QuoteApproval[]
+  numbering       NumberingScheme[]
+  audit_logs      AuditLog[]
+  leads           Lead[]
+  bookings        Booking[]
+
+  @@map("tenant")
+}
+
+model Company {
+  company_id BigInt   @id @default(autoincrement())
+  tenant_id  BigInt
+  name       String   @db.VarChar(150)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+  created_by BigInt?
+  updated_by BigInt?
+
+  tenant          Tenant          @relation(fields: [tenant_id], references: [tenant_id])
+  branches        Branch[]
+  quotations      Quotation[]
+  quotation_lines QuotationLine[]
+  price_books     PriceBook[]
+  rate_cards      RateCard[]
+  packages        Package[]
+  approvals       QuoteApproval[]
+  audit_logs      AuditLog[]
+
+  @@index([tenant_id])
+  @@map("company")
+}
+
+model Branch {
+  branch_id  BigInt   @id @default(autoincrement())
+  tenant_id  BigInt
+  company_id BigInt
+  name       String   @db.VarChar(150)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+  created_by BigInt?
+  updated_by BigInt?
+
+  tenant          Tenant          @relation(fields: [tenant_id], references: [tenant_id])
+  company         Company         @relation(fields: [company_id], references: [company_id])
+  quotations      Quotation[]
+  quotation_lines QuotationLine[]
+  price_books     PriceBook[]
+  rate_cards      RateCard[]
+  packages        Package[]
+  approvals       QuoteApproval[]
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@map("branch")
+}
+
+model UserAccount {
+  user_id       BigInt   @id @default(autoincrement())
+  tenant_id     BigInt
+  email         String   @unique
+  password_hash String
+  first_name    String
+  last_name     String
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz
+  updated_at    DateTime @updatedAt @db.Timestamptz
+  created_by    BigInt?
+  updated_by    BigInt?
+
+  tenant     Tenant     @relation(fields: [tenant_id], references: [tenant_id])
+  user_roles UserRole[]
+
+  @@index([tenant_id])
+  @@map("user_account")
+}
+
+model Role {
+  role_id    BigInt   @id @default(autoincrement())
+  tenant_id  BigInt
+  name       String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+  created_by BigInt?
+  updated_by BigInt?
+
+  tenant      Tenant           @relation(fields: [tenant_id], references: [tenant_id])
+  user_roles  UserRole[]
+  permissions RolePermission[]
+
+  @@index([tenant_id])
+  @@map("role")
+}
+
+model UserRole {
+  user_id BigInt
+  role_id BigInt
+
+  user UserAccount @relation(fields: [user_id], references: [user_id])
+  role Role        @relation(fields: [role_id], references: [role_id])
+
+  @@id([user_id, role_id])
+  @@map("user_role")
+}
+
+model Permission {
+  permission_id BigInt   @id @default(autoincrement())
+  tenant_id     BigInt
+  name          String
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz
+  updated_at    DateTime @updatedAt @db.Timestamptz
+
+  tenant           Tenant           @relation(fields: [tenant_id], references: [tenant_id])
+  role_permissions RolePermission[]
+
+  @@index([tenant_id])
+  @@map("permission")
+}
+
+model RolePermission {
+  role_id       BigInt
+  permission_id BigInt
+
+  role       Role       @relation(fields: [role_id], references: [role_id])
+  permission Permission @relation(fields: [permission_id], references: [permission_id])
+
+  @@id([role_id, permission_id])
+  @@map("role_permission")
+}
+
+model NumberingScheme {
+  scheme_id   BigInt   @id @default(autoincrement())
+  tenant_id   BigInt
+  entity_type String   @db.VarChar(50)
+  prefix      String   @db.VarChar(10)
+  current_seq Int      @default(0)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenant_id], references: [tenant_id])
+
+  @@index([tenant_id])
+  @@map("numbering_scheme")
+}
+
+model AuditLog {
+  log_id      BigInt   @id @default(autoincrement())
+  tenant_id   BigInt
+  company_id  BigInt
+  user_id     BigInt
+  action      String   @db.VarChar(100)
+  entity_type String   @db.VarChar(50)
+  entity_id   BigInt
+  details     Json?
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  tenant  Tenant  @relation(fields: [tenant_id], references: [tenant_id])
+  company Company @relation(fields: [company_id], references: [company_id])
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@map("audit_log")
+}
+
+model TaxRule {
+  tax_rule_id  BigInt   @id @default(autoincrement())
+  tenant_id    BigInt
+  name         String
+  rate_percent Decimal  @db.Decimal(5, 2)
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamptz
+  updated_at   DateTime @updatedAt @db.Timestamptz
+  created_by   BigInt?
+  updated_by   BigInt?
+
+  tenant          Tenant          @relation(fields: [tenant_id], references: [tenant_id])
+  quotation_lines QuotationLine[]
+
+  @@index([tenant_id])
+  @@map("tax_rule")
+}
+
+model Lead {
+  lead_id    BigInt   @id @default(autoincrement())
+  tenant_id  BigInt
+  name       String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  tenant     Tenant      @relation(fields: [tenant_id], references: [tenant_id])
+  quotations Quotation[]
+
+  @@index([tenant_id])
+  @@map("lead")
+}
+
+model Booking {
+  booking_id   BigInt   @id @default(autoincrement())
+  tenant_id    BigInt
+  quotation_id BigInt?  @unique
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamptz
+  updated_at   DateTime @updatedAt @db.Timestamptz
+
+  tenant    Tenant     @relation(fields: [tenant_id], references: [tenant_id])
+  quotation Quotation? @relation(fields: [quotation_id], references: [quotation_id])
+
+  @@index([tenant_id])
+  @@map("booking")
+}
+
+// ---------------------------------------------------------
+// MODULE 2: QTN - QUOTATION & PROPOSAL MANAGEMENT
+// ---------------------------------------------------------
+
+model Quotation {
+  quotation_id BigInt    @id @default(autoincrement())
+  tenant_id    BigInt
+  company_id   BigInt
+  branch_id    BigInt
+  lead_id      BigInt
+  version      Int       @default(1)
+  currency     String    @default("INR") @db.VarChar(3)
+  subtotal     Decimal   @db.Decimal(14, 2)
+  tax_total    Decimal   @db.Decimal(14, 2)
+  total        Decimal   @db.Decimal(14, 2)
+  cost_total   Decimal   @db.Decimal(14, 2)
+  margin       Decimal   @db.Decimal(14, 2)
+  status       String    @db.VarChar(50)
+  parent_quotation_id BigInt? // STUB: Used for version comparison linking
+
+  expires_at   DateTime? @db.Timestamptz
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+  created_by   BigInt?
+  updated_by   BigInt?
+  is_active    Boolean   @default(true)
+
+  tenant  Tenant  @relation(fields: [tenant_id], references: [tenant_id])
+  company Company @relation(fields: [company_id], references: [company_id])
+  branch  Branch  @relation(fields: [branch_id], references: [branch_id])
+  lead    Lead    @relation(fields: [lead_id], references: [lead_id])
+
+  lines     QuotationLine[]
+  approvals QuoteApproval[]
+  booking   Booking?
+  proposal  Proposal?
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@index([lead_id])
+  @@index([status])
+  @@map("quotation")
+}
+
+model QuotationLine {
+  line_id      BigInt   @id @default(autoincrement())
+  tenant_id    BigInt
+  company_id   BigInt
+  branch_id    BigInt
+  quotation_id BigInt
+  item_type    String   @db.VarChar(50)
+  ref_id       BigInt
+  description  String
+  qty          Int
+  rate         Decimal  @db.Decimal(14, 2)
+  cost         Decimal  @db.Decimal(14, 2)
+  tax_rule_id  BigInt?
+  amount       Decimal  @db.Decimal(14, 2)
+  created_at   DateTime @default(now()) @db.Timestamptz
+  updated_at   DateTime @updatedAt @db.Timestamptz
+  created_by   BigInt?
+  updated_by   BigInt?
+  is_active    Boolean  @default(true)
+
+  tenant    Tenant    @relation(fields: [tenant_id], references: [tenant_id])
+  company   Company   @relation(fields: [company_id], references: [company_id])
+  branch    Branch    @relation(fields: [branch_id], references: [branch_id])
+  quotation Quotation @relation(fields: [quotation_id], references: [quotation_id])
+  tax_rule  TaxRule?  @relation(fields: [tax_rule_id], references: [tax_rule_id])
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@index([quotation_id])
+  @@map("quotation_line")
+}
+
+model PriceBook {
+  price_book_id BigInt    @id @default(autoincrement())
+  tenant_id     BigInt
+  company_id    BigInt
+  branch_id     BigInt
+  name          String
+  valid_from    DateTime? @db.Timestamptz
+  valid_to      DateTime? @db.Timestamptz
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @updatedAt @db.Timestamptz
+  created_by    BigInt?
+  updated_by    BigInt?
+  is_active     Boolean   @default(true)
+
+  tenant     Tenant     @relation(fields: [tenant_id], references: [tenant_id])
+  company    Company    @relation(fields: [company_id], references: [company_id])
+  branch     Branch     @relation(fields: [branch_id], references: [branch_id])
+  rate_cards RateCard[]
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@map("price_book")
+}
+
+model RateCard {
+  rate_card_id  BigInt   @id @default(autoincrement())
+  tenant_id     BigInt
+  company_id    BigInt
+  branch_id     BigInt
+  price_book_id BigInt
+  item_name     String
+  item_type     String   @default("SERVICES") @db.VarChar(50)
+  image_url     String?
+  uom           String   @db.VarChar(50)
+  rate          Decimal  @db.Decimal(14, 2)
+  cost          Decimal  @db.Decimal(14, 2)
+  created_at    DateTime @default(now()) @db.Timestamptz
+  updated_at    DateTime @updatedAt @db.Timestamptz
+  created_by    BigInt?
+  updated_by    BigInt?
+  is_active     Boolean  @default(true)
+
+  tenant     Tenant    @relation(fields: [tenant_id], references: [tenant_id])
+  company    Company   @relation(fields: [company_id], references: [company_id])
+  branch     Branch    @relation(fields: [branch_id], references: [branch_id])
+  price_book PriceBook @relation(fields: [price_book_id], references: [price_book_id])
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@index([price_book_id])
+  @@map("rate_card")
+}
+
+model Package {
+  package_id BigInt   @id @default(autoincrement())
+  tenant_id  BigInt
+  company_id BigInt
+  branch_id  BigInt
+  name       String
+  base_price Decimal  @db.Decimal(14, 2)
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+  created_by BigInt?
+  updated_by BigInt?
+  is_active  Boolean  @default(true)
+
+  tenant  Tenant  @relation(fields: [tenant_id], references: [tenant_id])
+  company Company @relation(fields: [company_id], references: [company_id])
+  branch  Branch  @relation(fields: [branch_id], references: [branch_id])
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@map("package")
+}
+
+model QuoteApproval {
+  approval_id  BigInt    @id @default(autoincrement())
+  tenant_id    BigInt
+  company_id   BigInt
+  branch_id    BigInt
+  quotation_id BigInt
+  approver_id  BigInt
+  status       String    @db.VarChar(50)
+  decided_at   DateTime? @db.Timestamptz
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+  created_by   BigInt?
+  updated_by   BigInt?
+  is_active    Boolean   @default(true)
+
+  tenant    Tenant    @relation(fields: [tenant_id], references: [tenant_id])
+  company   Company   @relation(fields: [company_id], references: [company_id])
+  branch    Branch    @relation(fields: [branch_id], references: [branch_id])
+  quotation Quotation @relation(fields: [quotation_id], references: [quotation_id])
+
+  comments  QuoteApprovalComment[]
+  history   QuoteApprovalHistory[]
+
+  @@index([tenant_id])
+  @@index([company_id])
+  @@index([quotation_id])
+  @@map("quote_approval")
+}
+
+// STUB: Proposal Model
+model Proposal {
+  proposal_id  BigInt    @id @default(autoincrement())
+  tenant_id    BigInt
+  company_id   BigInt
+  quotation_id BigInt    @unique
+  public_hash  String    @unique @db.VarChar(255)
+  status       String    @db.VarChar(50)
+  view_count   Int       @default(0)
+  accepted_at  DateTime? @db.Timestamptz
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+
+  quotation    Quotation @relation(fields: [quotation_id], references: [quotation_id])
+  views        ProposalView[]
+  signature    ProposalSignature?
+
+  @@index([tenant_id])
+  @@map("proposal")
+}
+
+model ProposalView {
+  view_id      BigInt   @id @default(autoincrement())
+  proposal_id  BigInt
+  viewed_at    DateTime @default(now()) @db.Timestamptz
+  ip_address   String?  @db.VarChar(45)
+  user_agent   String?
+
+  proposal     Proposal @relation(fields: [proposal_id], references: [proposal_id])
+
+  @@index([proposal_id])
+  @@map("proposal_view")
+}
+
+model ProposalSignature {
+  signature_id BigInt   @id @default(autoincrement())
+  proposal_id  BigInt   @unique
+  signer_name  String
+  signer_email String
+  signature_ip String   @db.VarChar(45)
+  signed_at    DateTime @default(now()) @db.Timestamptz
+  signature_data String?
+
+  proposal     Proposal @relation(fields: [proposal_id], references: [proposal_id])
+
+  @@map("proposal_signature")
+}
+
+model QuoteApprovalComment {
+  comment_id   BigInt   @id @default(autoincrement())
+  approval_id  BigInt
+  comment      String
+  created_by   BigInt   @default(1)
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  approval     QuoteApproval @relation(fields: [approval_id], references: [approval_id])
+
+  @@map("quote_approval_comment")
+}
+
+model QuoteApprovalHistory {
+  history_id   BigInt   @id @default(autoincrement())
+  approval_id  BigInt
+  action       String   @db.VarChar(100)
+  performed_by String   @db.VarChar(100)
+  notes        String?
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  approval     QuoteApproval @relation(fields: [approval_id], references: [approval_id])
+
+  @@map("quote_approval_history")
+}

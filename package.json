@@ -1,0 +1,11 @@
+{
+  "name": "eventhub360",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "dependencies": {
+    "rxjs": "^7.8.2"
+  }
+}
