@@ -18,6 +18,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Generate Prisma client
+        run: npm run prisma:generate --workspace backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/eventhub360_ci
       - run: npm run lint
       - run: npm test
       - run: npm run build
