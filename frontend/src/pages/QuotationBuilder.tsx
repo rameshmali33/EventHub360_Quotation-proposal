@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import BuilderTopHeader from '../components/BuilderTopHeader';
 import ServiceAccordion from '../components/ServiceAccordion';
@@ -12,7 +12,9 @@ import ProposalGeneratorCard from '../components/ProposalGeneratorCard';
 import { MapPin, Palette, Utensils, Music, Save, Check, AlertCircle, X } from 'lucide-react';
 import { quotationService } from '../services/quotationService';
 import { approvalService } from '../services/approvalService';
-import { addSystemNotification } from '../utils/notifications';
+
+import { useAuth } from '../context/AuthContext';
+import { canEditDrafts, canSendToClient } from '../utils/permissions';
 
 const initialData = {
   venue: [],
@@ -29,7 +31,9 @@ const DEFAULT_COST_RATIOS: Record<string, number> = {
 };
 
 const QuotationBuilder = () => {
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = user?.role || 'Client';
+  const roleCanEdit = canEditDrafts(role);
   const [searchParams] = useSearchParams();
   const urlId = searchParams.get('id');
   const [fallbackId, setFallbackId] = useState<string | null>(null);
@@ -38,7 +42,6 @@ const QuotationBuilder = () => {
   const [activePackage, setActivePackage] = useState<string>('custom');
   const [quoteStatus, setQuoteStatus] = useState<string>('DRAFT');
   const [leadName, setLeadName] = useState<string>('');
-  const [leadId, setLeadId] = useState<number | null>(null);
   // Backend-calculated totals (from DB)
   const [quoteSubtotal, setQuoteSubtotal] = useState<number | null>(null);
   const [quoteTaxTotal, setQuoteTaxTotal] = useState<number | null>(null);
@@ -110,7 +113,6 @@ const QuotationBuilder = () => {
   };
   const [originalLines, setOriginalLines] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
     show: false,
     message: '',
@@ -198,7 +200,6 @@ const QuotationBuilder = () => {
   // Load Quotation Lines from Backend
   useEffect(() => {
     if (quotationId) {
-      setLoading(true);
       quotationService.getQuotation(Number(quotationId))
         .then(async res => {
           if (res) {
@@ -217,7 +218,6 @@ const QuotationBuilder = () => {
               quote.contact_name ||
               '';
             setLeadName(name);
-            setLeadId(quote.lead_id || null);
             // Store backend-calculated totals
             setQuoteSubtotal(Number(quote.subtotal) || null);
             setQuoteTaxTotal(Number(quote.tax_total) || null);
@@ -230,8 +230,7 @@ const QuotationBuilder = () => {
             }
           }
         })
-        .catch(err => console.error('Failed to load quotation details:', err))
-        .finally(() => setLoading(false));
+        .catch(err => console.error('Failed to load quotation details:', err));
     }
   }, [quotationId]);
 
@@ -367,7 +366,6 @@ const QuotationBuilder = () => {
           res.contact_name ||
           '';
         setLeadName(name);
-        setLeadId(res.lead_id || null);
         // Sync backend-calculated totals after save
         setQuoteSubtotal(Number(res.subtotal) || null);
         setQuoteTaxTotal(Number(res.tax_total) || null);
@@ -426,7 +424,6 @@ const QuotationBuilder = () => {
         <main className="flex-1 overflow-y-auto p-8 pb-20">
           <div className="max-w-[1400px] mx-auto">
             
-            {/* Page Header */}
             <div className="mb-8 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-4 mb-2">
@@ -450,7 +447,7 @@ const QuotationBuilder = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {(quoteStatus === 'DRAFT' || quoteStatus === 'REJECTED' || quoteStatus === 'CHANGES_REQUESTED') && (
+                {roleCanEdit && (quoteStatus === 'DRAFT' || quoteStatus === 'REJECTED' || quoteStatus === 'CHANGES_REQUESTED') && (
                   <button
                     onClick={handleRequestApproval}
                     disabled={saving}
@@ -460,6 +457,7 @@ const QuotationBuilder = () => {
                   </button>
                 )}
 
+                {roleCanEdit && (quoteStatus === 'DRAFT' || quoteStatus === 'CHANGES_REQUESTED') && (
                 <button
                   onClick={handleSaveChanges}
                   disabled={saving}
@@ -468,16 +466,14 @@ const QuotationBuilder = () => {
                   <Save className="w-5 h-5" />
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
+                )}
               </div>
             </div>
 
-            {/* Layout Grid */}
             <div className="flex flex-col xl:flex-row gap-8">
               
-              {/* Left Column - Builder Content */}
-              <div className="flex-1 xl:w-[70%]">
+              <fieldset disabled={!roleCanEdit} className="flex-1 xl:w-[70%] disabled:opacity-90">
                 
-                {/* Section 1: Venue */}
                 <ServiceAccordion icon={MapPin} title="Venue Selection">
                   <QuotationTableEditor 
                     items={sections.venue}
@@ -487,7 +483,6 @@ const QuotationBuilder = () => {
                   />
                 </ServiceAccordion>
 
-                {/* Section 2: Floral */}
                 <ServiceAccordion icon={Palette} title="Floral & Decoration">
                   <QuotationTableEditor 
                     items={sections.floral}
@@ -497,7 +492,6 @@ const QuotationBuilder = () => {
                   />
                 </ServiceAccordion>
 
-                {/* Section 3: Catering */}
                 <ServiceAccordion icon={Utensils} title="Gourmet Catering">
                   <CateringTableEditor 
                     items={sections.catering}
@@ -509,7 +503,6 @@ const QuotationBuilder = () => {
                   />
                 </ServiceAccordion>
 
-                {/* Section 4: Entertainment */}
                 <ServiceAccordion icon={Music} title="Entertainment & Sound">
                   <QuotationTableEditor 
                     items={sections.entertainment}
@@ -519,9 +512,8 @@ const QuotationBuilder = () => {
                   />
                 </ServiceAccordion>
 
-              </div>
+              </fieldset>
 
-              {/* Right Column - Sticky Panel */}
               <div className="w-full xl:w-[30%] relative">
                 <div className="sticky top-0 pt-2">
                   <QuoteSummaryCard
@@ -532,7 +524,7 @@ const QuotationBuilder = () => {
                   />
                   <ProfitMarginCard subtotal={quoteSubtotal ?? calculateSubtotal()} margin={calculateEstimatedMargin()} />
                   <EventInfoCard />
-                  <ProposalGeneratorCard quotationId={quotationId} quoteStatus={quoteStatus} />
+                  {canSendToClient(role) && <ProposalGeneratorCard quotationId={quotationId} quoteStatus={quoteStatus} />}
                 </div>
               </div>
 
@@ -542,7 +534,6 @@ const QuotationBuilder = () => {
         </main>
       </div>
 
-      {/* Premium Toast Notification */}
       {toast.show && (
         <div className="fixed top-6 right-6 z-50 animate-in slide-in-from-right duration-300">
           <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border ${

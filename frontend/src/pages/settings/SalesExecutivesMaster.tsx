@@ -1,12 +1,10 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { useToast } from '../../context/ToastContext';
-import {
-  ArrowLeft, BadgeIndianRupee, Mail, Phone, Plus, Search, Trash2, UserRound, X, Edit3, CheckCircle2
-} from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Plus, Search, Trash2, UserRound, X, Edit3, CheckCircle2 } from 'lucide-react';
 
 const SALES_EXECUTIVES_KEY = 'sales_executives_master';
 

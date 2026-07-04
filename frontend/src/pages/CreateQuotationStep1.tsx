@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, Info, X, ArrowRight, ArrowLeft, 
-  User, Calendar, MapPin, Utensils, CreditCard, Eye, Check, AlertCircle 
-} from 'lucide-react';
+import { Search, Info, X, ArrowRight, ArrowLeft, Check, AlertCircle } from 'lucide-react';
 import WizardNavbar from '../components/WizardNavbar';
 import WizardProgress from '../components/WizardProgress';
 import { quotationService } from '../services/quotationService';
 import { leadService, type LeadOption } from '../services/leadService';
 import { catalogService } from '../services/catalogService';
+import { catalogCategoryService, defaultCatalogCategories } from '../services/catalogCategoryService';
 import { addSystemNotification } from '../utils/notifications';
 import { EVENT_TYPES_CHANGED_EVENT, getActiveEventTypes } from '../utils/eventTypes';
 import { INR_SYMBOL, formatCurrency } from '../utils/currency';
@@ -148,9 +146,10 @@ const CreateQuotationStep1 = () => {
       setCatalogError('');
 
       try {
-        const [priceBooksRes, packagesRes] = await Promise.all([
+        const [priceBooksRes, packagesRes, categoriesRes] = await Promise.all([
           catalogService.getPriceBooks(),
           catalogService.getPackages(),
+          catalogCategoryService.list().catch(() => ({ data: defaultCatalogCategories, total: defaultCatalogCategories.length })),
         ]);
 
         const priceBooks = priceBooksRes.data || [];
@@ -158,7 +157,8 @@ const CreateQuotationStep1 = () => {
         const rateCardsRes = selectedPriceBook
           ? await catalogService.getRateCards(Number(selectedPriceBook.price_book_id))
           : { data: [] };
-        const rateCards = rateCardsRes.data || [];
+        const activeCategoryCodes = new Set((categoriesRes.data || defaultCatalogCategories).map((category: any) => category.code));
+        const rateCards = (rateCardsRes.data || []).filter((item: any) => activeCategoryCodes.has(normalizeType(item.item_type)));
 
         const venues: VenueOption[] = rateCards
           .filter((item: any) => normalizeType(item.item_type) === 'VENUES')
@@ -183,7 +183,7 @@ const CreateQuotationStep1 = () => {
           }));
 
         const rateServices: ServiceItem[] = rateCards
-          .filter((item: any) => ['SERVICES', 'VENDORS'].includes(normalizeType(item.item_type)))
+          .filter((item: any) => !['VENUES', 'FLORAL_DECORATION', 'PACKAGES'].includes(normalizeType(item.item_type)))
           .map((item: any) => {
             const normalizedType = normalizeType(item.item_type);
             return {
@@ -199,7 +199,7 @@ const CreateQuotationStep1 = () => {
 
 
 
-        const packageServices: ServiceItem[] = (packagesRes.data || []).map((item: any) => ({
+        const packageServices: ServiceItem[] = activeCategoryCodes.has('PACKAGES') ? (packagesRes.data || []).map((item: any) => ({
           id: `package-${item.package_id}`,
           refId: Number(item.package_id),
           itemType: 'PACKAGE',
@@ -207,7 +207,7 @@ const CreateQuotationStep1 = () => {
           price: Number(item.base_price || 0),
           cost: Number(item.base_price || 0),
           selected: false,
-        }));
+        })) : [];
         if (!cancelled) {
           setVenueOptions(venues);
           setSelectedVenueId(prev => prev || venues[0]?.id || '');
@@ -445,7 +445,6 @@ const CreateQuotationStep1 = () => {
 
       <div className="w-full max-w-[900px] mx-auto bg-white rounded-[32px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden border border-[#ECECF1]">
         
-        {/* Header Block */}
         <div className="h-[140px] px-10 border-b border-[#ECECF1] flex items-center justify-between bg-white relative z-10">
           <div>
             <h2 className="text-[36px] font-bold text-gray-900 tracking-tight leading-none mb-2">
@@ -474,7 +473,6 @@ const CreateQuotationStep1 = () => {
           </div>
         </div>
 
-        {/* Validation Banner */}
         {validationError && (
           <div className="bg-red-50 border-b border-red-100 px-10 py-3 flex items-center gap-3 text-red-700 text-sm font-bold animate-in slide-in-from-top-2">
             <AlertCircle className="w-5 h-5 shrink-0" />
@@ -483,7 +481,6 @@ const CreateQuotationStep1 = () => {
         )}
 
         <form onSubmit={onSubmit}>
-          {/* STEP 1: CLIENT INFO */}
           {currentStep === 1 && (
             <div className="p-10 space-y-8 animate-in fade-in duration-300">
               <div className="flex flex-col gap-2">
@@ -601,7 +598,6 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* STEP 2: EVENT DETAILS */}
           {currentStep === 2 && (
             <div className="p-10 space-y-8 animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -657,7 +653,6 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* STEP 3: VENUE SELECTION */}
           {currentStep === 3 && (
             <div className="p-10 space-y-8 animate-in fade-in duration-300">
               <div className="flex flex-col gap-2">
@@ -717,7 +712,6 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* STEP 4: FLORAL & DECORATION */}
           {currentStep === 4 && (
             <div className="p-10 space-y-6 animate-in fade-in duration-300">
               <p className="text-sm font-semibold text-gray-500">Choose floral, decoration, and styling items from the Price Book.</p>
@@ -768,7 +762,6 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* STEP 5: SERVICES SELECTION */}
           {currentStep === 5 && (
             <div className="p-10 space-y-6 animate-in fade-in duration-300">
               <p className="text-sm font-semibold text-gray-500">Choose add-on packages to apply automatically to the quotation sheets.</p>
@@ -819,11 +812,9 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* STEP 6: PRICING & DISCOUNTS */}
           {currentStep === 6 && (
             <div className="p-10 space-y-8 animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Inputs card */}
                 <div className="bg-[#F8F9FC] border border-[#ECECF1] rounded-[24px] p-6 space-y-4">
                   <h4 className="font-bold text-gray-900 text-base">Adjustments</h4>
                   <div>
@@ -843,7 +834,6 @@ const CreateQuotationStep1 = () => {
                   </p>
                 </div>
 
-                {/* Calculation breakdown */}
                 <div className="bg-white border border-[#ECECF1] rounded-[24px] p-6 space-y-3">
                   <h4 className="font-bold text-gray-900 text-base mb-4">Pricing Estimation</h4>
                   <div className="flex justify-between text-sm text-gray-600">
@@ -873,7 +863,6 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* STEP 7: REVIEW & FINALIZE */}
           {currentStep === 7 && (
             <div className="p-10 space-y-8 animate-in fade-in duration-300">
               <div className="border border-[#ECECF1] rounded-[24px] overflow-hidden">
@@ -883,7 +872,6 @@ const CreateQuotationStep1 = () => {
                 </div>
 
                 <div className="p-6 space-y-6">
-                  {/* Grid */}
                   <div className="grid grid-cols-2 gap-6 border-b border-[#ECECF1] pb-6">
                     <div>
                       <p className="text-xs text-gray-400 font-bold uppercase mb-1">Client Name</p>
@@ -926,7 +914,6 @@ const CreateQuotationStep1 = () => {
             </div>
           )}
 
-          {/* Footer Action Bar */}
           <div className="h-[110px] px-8 border-t border-[#ECECF1] bg-white flex items-center justify-between rounded-b-[32px]">
             <button 
               type="button" 
@@ -969,7 +956,6 @@ const CreateQuotationStep1 = () => {
         </form>
       </div>
 
-      {/* Premium Toast Notification */}
       {toast.show && (
         <div className="fixed top-6 right-6 z-50 animate-in slide-in-from-right duration-300">
           <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-xl border ${

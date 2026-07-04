@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import ProposalToolbar from '../components/ProposalToolbar';
@@ -9,10 +9,11 @@ import ProposalSettingsCard from '../components/ProposalSettingsCard';
 import { CollaborationCard, SendStatusCard } from '../components/CollaborationCard';
 import { proposalService, Proposal } from '../services/proposalService';
 import { quotationService } from '../services/quotationService';
-import { Files, FileText, Loader, Search, ArrowRight, Send, CheckCircle2 } from 'lucide-react';
+import { Files, FileText, Loader, Search, ArrowRight } from 'lucide-react';
 
 const initialPages = [
   { id: 'cover', title: 'Cover Page', type: 'cover' },
+  { id: 'quotation', title: 'Quotation', type: 'quotation' },
   { id: 'moodboard', title: 'Moodboard', type: 'moodboard' },
   { id: 'agenda', title: 'Event Timeline', type: 'agenda' },
 ];

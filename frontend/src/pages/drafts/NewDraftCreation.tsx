@@ -1,10 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, FilePlus, Copy, LayoutTemplate, UploadCloud, ChevronRight
-} from 'lucide-react';
+import { ArrowLeft, FilePlus, Copy, LayoutTemplate, UploadCloud, ChevronRight } from 'lucide-react';
 
 const NewDraftCreation = () => {
   const navigate = useNavigate();

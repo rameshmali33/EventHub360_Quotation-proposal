@@ -6,15 +6,22 @@ import { PrismaService } from '../../prisma/prisma.service';
 function serializeDbObject(obj: any): any {
   if (!obj) return obj;
   if (Array.isArray(obj)) {
-    return obj.map(item => serializeDbObject(item));
+    return obj.map((item) => serializeDbObject(item));
   }
   const serialized = { ...obj };
   for (const key of Object.keys(serialized)) {
     if (typeof serialized[key] === 'bigint') {
       serialized[key] = Number(serialized[key]);
-    } else if (serialized[key] && typeof serialized[key].toNumber === 'function') {
+    } else if (
+      serialized[key] &&
+      typeof serialized[key].toNumber === 'function'
+    ) {
       serialized[key] = serialized[key].toNumber();
-    } else if (typeof serialized[key] === 'object' && serialized[key] !== null && !(serialized[key] instanceof Date)) {
+    } else if (
+      typeof serialized[key] === 'object' &&
+      serialized[key] !== null &&
+      !(serialized[key] instanceof Date)
+    ) {
       serialized[key] = serializeDbObject(serialized[key]);
     }
   }
@@ -40,7 +47,9 @@ export class PackageService {
   }
 
   async findAll(query: CatalogListQueryDto) {
-    const search = query.search ? { name: { contains: query.search, mode: 'insensitive' as const } } : {};
+    const search = query.search
+      ? { name: { contains: query.search, mode: 'insensitive' as const } }
+      : {};
     const where = { is_active: true, ...search };
     const total = await this.prisma.package.count({ where });
 
@@ -102,4 +111,3 @@ export class PackageService {
     return { message: `Package ${id} soft deleted` };
   }
 }
-

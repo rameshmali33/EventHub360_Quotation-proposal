@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
@@ -6,6 +6,8 @@ import QuotationTable from '../components/QuotationTable';
 import SummaryMetricCard from '../components/SummaryMetricCard';
 import { Plus, TrendingUp, CheckCheck, Clock } from 'lucide-react';
 import { qtnDashboardService } from '../services/qtnDashboardService';
+import { useAuth } from '../context/AuthContext';
+import { canCreateQuotes, normalizeRole } from '../utils/permissions';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
@@ -13,13 +15,15 @@ const formatCurrency = (val: number) => {
 
 const QuotationListPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dashboardAllowed = ['Super Admin', 'Company Owner', 'Sales Manager', 'Sales Executive'].includes(normalizeRole(user?.role));
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     qtnDashboardService.getStats()
       .then(res => setStats(res))
       .catch(err => console.error('Failed to load stats:', err));
-  }, []);
+  }, [dashboardAllowed]);
 
   const totalPipeline = stats ? stats.averageDealValue * stats.totalQuotations : 0;
   const conversionRate = stats ? `${stats.acceptanceRate}%` : '0%';
@@ -29,15 +33,12 @@ const QuotationListPage = () => {
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans">
       <Sidebar />
       
-      {/* Main Content */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         <TopHeader />
         
-        {/* Scrollable Area */}
         <main className="flex-1 overflow-y-auto p-8">
           <div className="max-w-[1400px] mx-auto space-y-8">
             
-            {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-[32px] font-bold text-gray-900 tracking-tight leading-none mb-2">Live Quotations</h1>
@@ -46,7 +47,7 @@ const QuotationListPage = () => {
                 </p>
               </div>
               
-              {/* Header Actions */}
+              {canCreateQuotes(user?.role) && (
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => navigate('/quotations/new')}
@@ -56,12 +57,12 @@ const QuotationListPage = () => {
                   Create Quote
                 </button>
               </div>
+              )}
             </div>
 
-            {/* Main Quotations Table Card */}
             <QuotationTable />
 
-            {/* KPI Summary Section */}
+            {dashboardAllowed && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <SummaryMetricCard 
                 icon={TrendingUp} 
@@ -85,6 +86,7 @@ const QuotationListPage = () => {
                 iconColor="text-amber-600" 
               />
             </div>
+            )}
 
           </div>
         </main>

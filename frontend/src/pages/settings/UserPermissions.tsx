@@ -1,326 +1,156 @@
-﻿import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Check, Loader2, Lock, Shield, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import ConfirmationModal from '../../components/ConfirmationModal';
 import { useToast } from '../../context/ToastContext';
-import {
-  ArrowLeft, Users, Shield, Plus, Edit2, Trash2, CheckCircle2, Lock, X
-} from 'lucide-react';
+import { authService, type AuthUser } from '../../services/authService';
+import { ASSIGNABLE_ROLES, normalizeRole, type AppRole } from '../../utils/permissions';
 
-const ROLES_KEY = 'user_permission_roles';
-
-type PermissionKey = 'createQuotes' | 'approveQuotes' | 'deleteQuotes' | 'manageTemplates' | 'manageBranding';
-
-type Role = {
-  id: string;
-  name: string;
-  type: 'System' | 'Custom';
-  users: number;
-  color: string;
-  permissions: Record<PermissionKey, boolean>;
+const roleAccess: Record<AppRole, string[]> = {
+  'Super Admin': ['View quotes: Full', 'Create quotes: Full', 'Edit drafts: Full', 'Approve discounts: Full', 'Send to client: Full'],
+  'Company Owner': ['View quotes: Full', 'Create quotes: Full', 'Edit drafts: Full', 'Approve discounts: Tier 3', 'Send to client: Full'],
+  'Sales Manager': ['View quotes: Full', 'Create quotes: Full', 'Edit drafts: Full', 'Approve discounts: Tier 2', 'Send to client: Full'],
+  'Sales Executive': ['View quotes: Own only', 'Create quotes: Yes', 'Edit drafts: Own only', 'Approve discounts: No', 'Send to client: If approved'],
+  'Finance Manager': ['View quotes: Full', 'Create quotes: No', 'Edit drafts: No', 'Approve discounts: No', 'Send to client: No'],
+  'Event Manager': ['View quotes: Won only', 'Create quotes: No', 'Edit drafts: No', 'Approve discounts: No', 'Send to client: No'],
+  Auditor: ['View quotes: Full', 'Create quotes: No', 'Edit drafts: No', 'Approve discounts: No', 'Send to client: No'],
+  Client: ['Client proposal viewer only'],
 };
 
-const defaultRoles: Role[] = [
-  {
-    id: 'role-admin',
-    name: 'Administrator',
-    type: 'System',
-    users: 1,
-    color: 'bg-red-50 text-red-700',
-    permissions: {
-      createQuotes: true,
-      approveQuotes: true,
-      deleteQuotes: true,
-      manageTemplates: true,
-      manageBranding: true,
-    },
-  },
-  {
-    id: 'role-sales-director',
-    name: 'Sales Director',
-    type: 'System',
-    users: 0,
-    color: 'bg-indigo-50 text-indigo-700',
-    permissions: {
-      createQuotes: true,
-      approveQuotes: true,
-      deleteQuotes: false,
-      manageTemplates: true,
-      manageBranding: false,
-    },
-  },
-];
-
-const permissionLabels: { key: PermissionKey; title: string; desc: string; group: 'Quotations & Proposals' | 'Template Library' }[] = [
-  { key: 'createQuotes', title: 'Create & Edit Quotes', desc: 'Allow generating and modifying quotations.', group: 'Quotations & Proposals' },
-  { key: 'approveQuotes', title: 'Approve Quotes', desc: 'Allow approval workflow actions.', group: 'Quotations & Proposals' },
-  { key: 'deleteQuotes', title: 'Delete Quotes', desc: 'Allow removing quotation records.', group: 'Quotations & Proposals' },
-  { key: 'manageTemplates', title: 'Manage Templates', desc: 'Create, edit, and archive global templates.', group: 'Template Library' },
-  { key: 'manageBranding', title: 'Manage Branding', desc: 'Update global styling and brand settings.', group: 'Template Library' },
-];
-
-const ToggleSwitch = ({ enabled, onChange, disabled = false }: any) => (
-  <button
-    type="button"
-    disabled={disabled}
-    onClick={() => onChange(!enabled)}
-    className={`w-11 h-6 rounded-full transition-colors relative disabled:opacity-60 ${enabled ? 'bg-red-700' : 'bg-gray-200'}`}
-  >
-    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${enabled ? 'left-6' : 'left-1'}`} />
-  </button>
-);
-
-const emptyPermissions: Record<PermissionKey, boolean> = {
-  createQuotes: true,
-  approveQuotes: false,
-  deleteQuotes: false,
-  manageTemplates: false,
-  manageBranding: false,
+const roleColors: Record<AppRole, string> = {
+  'Super Admin': 'bg-red-50 text-red-700',
+  'Company Owner': 'bg-amber-50 text-amber-700',
+  'Sales Manager': 'bg-indigo-50 text-indigo-700',
+  'Sales Executive': 'bg-blue-50 text-blue-700',
+  'Finance Manager': 'bg-emerald-50 text-emerald-700',
+  'Event Manager': 'bg-cyan-50 text-cyan-700',
+  Auditor: 'bg-violet-50 text-violet-700',
+  Client: 'bg-gray-100 text-gray-700',
 };
 
 const UserPermissions = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [selectedRoleId, setSelectedRoleId] = useState('role-sales-director');
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
-  const [rolePendingDelete, setRolePendingDelete] = useState<Role | null>(null);
-  const [roleName, setRoleName] = useState('');
-  const [roleUsers, setRoleUsers] = useState('0');
-  const [rolePermissions, setRolePermissions] = useState<Record<PermissionKey, boolean>>(emptyPermissions);
+  const [users, setUsers] = useState<AuthUser[]>([]);
+  const [selectedRole, setSelectedRole] = useState<AppRole>('Sales Manager');
+  const [pendingRoles, setPendingRoles] = useState<Record<number, string>>({});
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const saved = localStorage.getItem(ROLES_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setRoles(parsed);
-      setSelectedRoleId(parsed[1]?.id || parsed[0]?.id || '');
-    } else {
-      localStorage.setItem(ROLES_KEY, JSON.stringify(defaultRoles));
-      setRoles(defaultRoles);
-      setSelectedRoleId(defaultRoles[1].id);
+  const loadUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await authService.listUsers();
+      setUsers(response);
+      setPendingRoles(Object.fromEntries(response.map((user) => [user.id, normalizeRole(user.role)])));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Failed to load users');
+    } finally {
+      setLoading(false);
     }
-  }, []);
-
-  const saveRoles = (next: Role[]) => {
-    localStorage.setItem(ROLES_KEY, JSON.stringify(next));
-    setRoles(next);
   };
 
-  const selectedRole = roles.find((role) => role.id === selectedRoleId) || roles[0];
-  const selectedPermissions = selectedRole?.permissions || emptyPermissions;
+  useEffect(() => { loadUsers(); }, []);
 
-  const openCreateRole = () => {
-    setEditingRole(null);
-    setRoleName('');
-    setRoleUsers('0');
-    setRolePermissions(emptyPermissions);
-    setShowRoleModal(true);
-  };
+  const counts = useMemo(() => users.reduce((result, user) => {
+    const role = normalizeRole(user.role);
+    result[role] = (result[role] || 0) + 1;
+    return result;
+  }, {} as Record<AppRole, number>), [users]);
 
-  const openEditRole = (role: Role) => {
-    setEditingRole(role);
-    setRoleName(role.name);
-    setRoleUsers(String(role.users));
-    setRolePermissions(role.permissions);
-    setShowRoleModal(true);
-  };
-
-  const handleRoleSave = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!roleName.trim()) {
-      showToast('Role name is required.', 'error');
-      return;
+  const saveRole = async (user: AuthUser) => {
+    const role = pendingRoles[user.id];
+    if (!role || role === normalizeRole(user.role)) return;
+    setSavingId(user.id);
+    try {
+      const updated = await authService.assignRole(user.id, role);
+      setUsers((current) => current.map((item) => item.id === user.id ? { ...item, ...updated } : item));
+      showToast(role + ' access assigned to ' + user.firstName + ' ' + user.lastName + '.', 'success');
+    } catch (caught) {
+      showToast(caught instanceof Error ? caught.message : 'Role assignment failed', 'error');
+      setPendingRoles((current) => ({ ...current, [user.id]: normalizeRole(user.role) }));
+    } finally {
+      setSavingId(null);
     }
-
-    const role: Role = {
-      id: editingRole?.id || `role-${Date.now()}`,
-      name: roleName.trim(),
-      type: editingRole?.type || 'Custom',
-      users: Number(roleUsers || 0),
-      color: editingRole?.color || 'bg-emerald-50 text-emerald-700',
-      permissions: rolePermissions,
-    };
-
-    const next = editingRole
-      ? roles.map((item) => item.id === editingRole.id ? role : item)
-      : [...roles, role];
-    saveRoles(next);
-    setSelectedRoleId(role.id);
-    setShowRoleModal(false);
-    showToast(editingRole ? 'Role updated successfully.' : 'Role created successfully.', 'success');
   };
-
-  const confirmDeleteRole = () => {
-    if (!rolePendingDelete) return;
-    const next = roles.filter((role) => role.id !== rolePendingDelete.id);
-    saveRoles(next);
-    if (selectedRoleId === rolePendingDelete.id) {
-      setSelectedRoleId(next[0]?.id || '');
-    }
-    showToast('Role deleted successfully.', 'success');
-    setRolePendingDelete(null);
-  };
-
-  const updateSelectedPermission = (key: PermissionKey, value: boolean) => {
-    if (!selectedRole || selectedRole.type === 'System') return;
-    const updatedRole = {
-      ...selectedRole,
-      permissions: {
-        ...selectedRole.permissions,
-        [key]: value,
-      },
-    };
-    saveRoles(roles.map((role) => role.id === selectedRole.id ? updatedRole : role));
-  };
-
-  const groupedPermissions = permissionLabels.reduce((acc, item) => {
-    acc[item.group] = [...(acc[item.group] || []), item];
-    return acc;
-  }, {} as Record<string, typeof permissionLabels>);
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans">
       <Sidebar />
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         <TopHeader />
-        <main className="flex-1 overflow-y-auto p-8 pb-32">
-          <div className="max-w-[1200px] mx-auto space-y-6">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <button onClick={() => navigate('/settings')} className="w-10 h-10 bg-white border border-[#ECECF1] rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                  <h1 className="text-[28px] font-bold text-gray-900 tracking-tight">Roles & Permissions</h1>
-                  <p className="text-[15px] text-gray-500 mt-1">Manage user access control and feature permissions.</p>
-                </div>
+        <main className="flex-1 overflow-y-auto p-8 pb-24">
+          <div className="max-w-[1240px] mx-auto space-y-6">
+            <div className="flex items-center gap-4 mb-7">
+              <button onClick={() => navigate('/settings')} className="w-10 h-10 bg-white border border-[#ECECF1] rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50"><ArrowLeft className="w-5 h-5" /></button>
+              <div>
+                <h1 className="text-[28px] font-bold text-gray-900">Users & Role Access</h1>
+                <p className="text-[14px] text-gray-500 mt-1">New accounts begin as Client. Only the Super Admin can assign operational roles.</p>
               </div>
-              <button onClick={openCreateRole} className="px-5 py-2.5 bg-gradient-to-r from-red-700 to-orange-400 text-white rounded-full font-bold text-[14px] shadow-sm hover:shadow-md transition-all flex items-center gap-2">
-                <Plus className="w-4 h-4" /> Create Role
-              </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-4 space-y-6">
-                <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] overflow-hidden">
-                  <div className="p-6 border-b border-[#ECECF1] flex items-center gap-3 bg-[#F8F9FC]">
-                    <div className="w-8 h-8 rounded-[12px] bg-white shadow-sm flex items-center justify-center text-gray-700">
-                      <Users className="w-4 h-4" />
-                    </div>
-                    <h2 className="text-[16px] font-bold text-gray-900">Configured Roles</h2>
+            <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+              <section className="rounded-lg border border-[#ECECF1] bg-white overflow-hidden shadow-sm">
+                <div className="p-5 border-b border-[#ECECF1] bg-[#F8F9FC] flex items-center gap-3"><Shield className="w-5 h-5 text-red-600" /><h2 className="font-bold text-gray-900">Access Matrix</h2></div>
+                <div className="divide-y divide-[#ECECF1]">
+                  {(Object.keys(roleAccess) as AppRole[]).map((role) => (
+                    <button key={role} onClick={() => setSelectedRole(role)} className={'w-full p-4 text-left transition-colors ' + (selectedRole === role ? 'bg-red-50/50' : 'hover:bg-gray-50')}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[14px] font-extrabold text-gray-900 flex items-center gap-2">{role}{role === 'Super Admin' && <Lock className="w-3.5 h-3.5 text-gray-400" />}</span>
+                        <span className={'rounded px-2 py-0.5 text-[10px] font-extrabold ' + roleColors[role]}>{counts[role] || 0} users</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="p-5 border-t border-[#ECECF1]">
+                  <p className="text-[11px] font-extrabold uppercase text-gray-400 mb-3">{selectedRole} access</p>
+                  <div className="space-y-2">
+                    {roleAccess[selectedRole].map((access) => <p key={access} className="flex gap-2 text-[12px] font-semibold text-gray-600"><Check className="w-4 h-4 text-emerald-600 shrink-0" />{access}</p>)}
                   </div>
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#ECECF1] bg-white overflow-hidden shadow-sm">
+                <div className="p-5 border-b border-[#ECECF1] bg-[#F8F9FC] flex items-center justify-between">
+                  <div className="flex items-center gap-3"><Users className="w-5 h-5 text-red-600" /><div><h2 className="font-bold text-gray-900">Registered Users</h2><p className="text-[11px] font-semibold text-gray-500">{users.length} accounts</p></div></div>
+                  <button onClick={loadUsers} className="text-[12px] font-bold text-red-600 hover:text-red-700">Refresh</button>
+                </div>
+                {error ? <div className="p-6 text-sm font-semibold text-red-700">{error}</div> : loading ? (
+                  <div className="p-10 flex items-center justify-center gap-3 text-sm font-semibold text-gray-500"><Loader2 className="w-5 h-5 animate-spin" />Loading users...</div>
+                ) : (
                   <div className="divide-y divide-[#ECECF1]">
-                    {roles.map((role) => (
-                      <button key={role.id} onClick={() => setSelectedRoleId(role.id)} className={`w-full p-5 text-left hover:bg-gray-50 transition-colors group ${selectedRoleId === role.id ? 'bg-red-50/40' : 'bg-white'}`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-[15px] font-bold text-gray-900 flex items-center gap-2">
-                            {role.name}
-                            {role.type === 'System' && <Lock className="w-3 h-3 text-gray-400" />}
-                          </h4>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(event) => event.stopPropagation()}>
-                            <button type="button" onClick={() => openEditRole(role)} className="text-gray-400 hover:text-gray-900"><Edit2 className="w-3.5 h-3.5" /></button>
-                            {role.type !== 'System' && <button type="button" onClick={() => setRolePendingDelete(role)} className="text-gray-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>}
+                    {users.map((user) => {
+                      const isAdmin = normalizeRole(user.role) === 'Super Admin';
+                      const changed = pendingRoles[user.id] !== normalizeRole(user.role);
+                      return (
+                        <div key={user.id} className="grid grid-cols-[1fr_190px_90px] items-center gap-4 px-5 py-4">
+                          <div className="min-w-0">
+                            <p className="text-[14px] font-extrabold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
+                            <p className="text-[12px] font-medium text-gray-500 truncate">{user.email} · {user.organizationName}</p>
                           </div>
+                          {isAdmin ? (
+                            <div className="h-10 flex items-center px-3 rounded-lg bg-red-50 text-red-700 text-[12px] font-extrabold"><Lock className="w-3.5 h-3.5 mr-2" />Super Admin</div>
+                          ) : (
+                            <select value={pendingRoles[user.id] || 'Client'} onChange={(event) => setPendingRoles((current) => ({ ...current, [user.id]: event.target.value }))} className="h-10 rounded-lg border border-[#E1E4EA] bg-white px-3 text-[12px] font-bold text-gray-700 outline-none focus:border-red-400">
+                              {ASSIGNABLE_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                          )}
+                          <button disabled={isAdmin || !changed || savingId === user.id} onClick={() => saveRole(user)} className="h-10 rounded-lg bg-gray-950 px-3 text-[12px] font-bold text-white disabled:bg-gray-100 disabled:text-gray-400">
+                            {savingId === user.id ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Save'}
+                          </button>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${role.color}`}>{role.users} Users</span>
-                          <span className="text-[12px] text-gray-500 font-semibold">{role.type} Role</span>
-                        </div>
-                      </button>
-                    ))}
+                      );
+                    })}
                   </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-8">
-                <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] p-8">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-[12px] bg-red-50 flex items-center justify-center text-red-600">
-                        <Shield className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-[18px] font-bold text-gray-900">Permission Matrix</h2>
-                        <p className="text-[13px] text-gray-500 mt-1">Editing permissions for: <span className="font-bold text-gray-700">{selectedRole?.name || 'No role selected'}</span></p>
-                      </div>
-                    </div>
-                    {selectedRole?.type === 'System' && (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-[11px] font-black uppercase">System role locked</span>
-                    )}
-                  </div>
-
-                  <div className="space-y-8">
-                    {Object.entries(groupedPermissions).map(([group, items]) => (
-                      <div key={group}>
-                        <h3 className="text-[14px] font-bold text-gray-900 uppercase tracking-widest mb-4 bg-[#F8F9FC] p-3 rounded-xl border border-[#ECECF1]">{group}</h3>
-                        <div className="space-y-4 px-2">
-                          {items.map((permission) => (
-                            <div key={permission.key} className="flex items-center justify-between">
-                              <div>
-                                <p className="text-[14px] font-bold text-gray-700">{permission.title}</p>
-                                <p className="text-[12px] text-gray-500">{permission.desc}</p>
-                              </div>
-                              <ToggleSwitch enabled={Boolean(selectedPermissions[permission.key])} disabled={selectedRole?.type === 'System'} onChange={(value: boolean) => updateSelectedPermission(permission.key, value)} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                )}
+              </section>
             </div>
           </div>
         </main>
       </div>
-
-      {showRoleModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[28px] w-full max-w-[520px] shadow-2xl border border-[#ECECF1] overflow-hidden">
-            <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
-              <h3 className="text-[20px] font-bold text-gray-900">{editingRole ? 'Edit Role' : 'Create Role'}</h3>
-              <button onClick={() => setShowRoleModal(false)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500"><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleRoleSave}>
-              <div className="p-6 space-y-5">
-                <div>
-                  <label className="block text-[13px] font-bold text-gray-700 mb-1.5">Role Name *</label>
-                  <input value={roleName} onChange={(event) => setRoleName(event.target.value)} className="w-full h-11 px-4 bg-gray-50 border border-transparent rounded-xl text-sm font-semibold focus:bg-white focus:border-red-400 focus:outline-none" placeholder="e.g. Sales Executive" />
-                </div>
-                <div>
-                  <label className="block text-[13px] font-bold text-gray-700 mb-1.5">Assigned Users</label>
-                  <input type="number" min="0" value={roleUsers} onChange={(event) => setRoleUsers(event.target.value)} className="w-full h-11 px-4 bg-gray-50 border border-transparent rounded-xl text-sm font-semibold focus:bg-white focus:border-red-400 focus:outline-none" />
-                </div>
-                <div className="rounded-2xl border border-[#ECECF1] p-4 space-y-3">
-                  <p className="text-[13px] font-bold text-gray-700">Starting Permissions</p>
-                  {permissionLabels.map((permission) => (
-                    <div key={permission.key} className="flex items-center justify-between gap-4">
-                      <span className="text-[13px] font-semibold text-gray-600">{permission.title}</span>
-                      <ToggleSwitch enabled={rolePermissions[permission.key]} onChange={(value: boolean) => setRolePermissions({ ...rolePermissions, [permission.key]: value })} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="p-6 border-t border-[#ECECF1] bg-gray-50 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowRoleModal(false)} className="h-11 px-5 rounded-full border border-gray-200 bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
-                <button type="submit" className="h-11 px-6 rounded-full bg-gradient-to-r from-red-700 to-orange-400 text-white text-[13px] font-bold shadow-md hover:shadow-lg">{editingRole ? 'Save Changes' : 'Create Role'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <ConfirmationModal
-        open={Boolean(rolePendingDelete)}
-        title="Delete Role?"
-        message={`This will remove ${rolePendingDelete?.name || 'this role'} from permissions.`}
-        confirmLabel="Delete Role"
-        onCancel={() => setRolePendingDelete(null)}
-        onConfirm={confirmDeleteRole}
-      />
     </div>
   );
 };

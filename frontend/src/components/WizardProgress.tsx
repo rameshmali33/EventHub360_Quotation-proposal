@@ -1,4 +1,4 @@
-﻿import React from 'react';
+
 import { User, Calendar, MapPin, Palette, Utensils, CreditCard, Eye, CheckCircle2 } from 'lucide-react';
 
 interface WizardProgressProps {

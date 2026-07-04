@@ -1,105 +1,133 @@
-import { Controller, Get, Post, Patch, Param, Body, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { AppRole } from '../../common/auth/roles';
+import { Roles } from '../../common/auth/roles.decorator';
+import { RolesGuard } from '../../common/auth/roles.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { QuotationService } from '../quotation/quotation.service';
 import { QuoteApprovalService } from './quote-approval.service';
-import { RequestApprovalDto } from './dto/request-approval.dto';
 import { ApprovalActionDto } from './dto/approval-action.dto';
 import { ApprovalCommentDto } from './dto/approval-comment.dto';
+import { RequestApprovalDto } from './dto/request-approval.dto';
+
+const APPROVER_ROLES = [AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER];
 
 @ApiTags('quote-approvals')
 @Controller()
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class QuoteApprovalController {
-  constructor(private readonly quoteApprovalService: QuoteApprovalService) {}
+  constructor(
+    private readonly service: QuoteApprovalService,
+    private readonly quotationService: QuotationService,
+  ) {}
+
+  private async assertRequestAccess(quotationId: number, request: any) {
+    const roles: AppRole[] = request.user.roles || [];
+    if (roles.includes(AppRole.EXECUTIVE)) {
+      await this.quotationService.findOne(quotationId, {
+        createdBy: Number(request.user.sub),
+      });
+    }
+  }
+
+  private async assertApprovalTier(approvalId: number, request: any) {
+    const roles: AppRole[] = request.user.roles || [];
+    if (roles.includes(AppRole.ADMINISTRATOR) || roles.includes(AppRole.OWNER))
+      return;
+    const approval = await this.service.findOne(approvalId);
+    if (approval.required_role === 'Company Owner') {
+      throw new ForbiddenException(
+        'Tier 3 discounts require Company Owner approval',
+      );
+    }
+  }
 
   @Get('api/v1/quote-approvals')
-  @ApiOperation({ summary: 'Get all quote approvals' })
-  @ApiResponse({ status: 200, description: 'Return all approvals.' })
+  @Roles(...APPROVER_ROLES)
   findAll() {
-    return this.quoteApprovalService.findAll();
+    return this.service.findAll();
   }
 
   @Get('api/v1/quote-approvals/:id')
-  @ApiOperation({ summary: 'Get a specific quote approval by ID' })
-  @ApiParam({ name: 'id', description: 'Approval ID', type: Number })
-  @ApiResponse({ status: 200, description: 'Return the approval.' })
-  @ApiResponse({ status: 404, description: 'Approval not found.' })
+  @Roles(...APPROVER_ROLES)
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.quoteApprovalService.findOne(id);
+    return this.service.findOne(id);
   }
 
   @Post('api/v1/quotations/:id/approval')
+  @Roles(
+    AppRole.ADMINISTRATOR,
+    AppRole.OWNER,
+    AppRole.MANAGER,
+    AppRole.EXECUTIVE,
+  )
   @ApiOperation({ summary: 'Request approval for a quotation' })
-  @ApiParam({ name: 'id', description: 'Quotation ID', type: Number })
-  @ApiResponse({ status: 201, description: 'Approval request successfully created.' })
-  @ApiResponse({ status: 400, description: 'Invalid request or already has pending request.' })
-  @ApiResponse({ status: 404, description: 'Quotation not found.' })
-  requestApproval(
+  @ApiParam({ name: 'id', type: Number })
+  async requestApproval(
     @Param('id', ParseIntPipe) id: number,
-    @Body() requestDto: RequestApprovalDto,
+    @Body() dto: RequestApprovalDto,
+    @Req() request: any,
   ) {
-    // TODO: Implement RBAC - Sales Exec request approval
-    return this.quoteApprovalService.requestApproval(id, requestDto);
+    await this.assertRequestAccess(id, request);
+    return this.service.requestApproval(id, dto);
   }
 
   @Patch('api/v1/quote-approvals/:id/approve')
-  @ApiOperation({ summary: 'Approve a pending quote approval request' })
-  @ApiParam({ name: 'id', description: 'Approval ID', type: Number })
-  @ApiResponse({ status: 200, description: 'Approval request approved.' })
-  @ApiResponse({ status: 400, description: 'Approval request not pending.' })
-  @ApiResponse({ status: 404, description: 'Approval not found.' })
-  approve(
+  @Roles(...APPROVER_ROLES)
+  async approve(
     @Param('id', ParseIntPipe) id: number,
-    @Body() actionDto: ApprovalActionDto,
+    @Body() dto: ApprovalActionDto,
+    @Req() request: any,
   ) {
-    // TODO: Implement RBAC - Sales Manager approval OR Company Owner approval
-    return this.quoteApprovalService.approve(id, actionDto);
+    await this.assertApprovalTier(id, request);
+    return this.service.approve(id, dto);
   }
 
   @Patch('api/v1/quote-approvals/:id/reject')
-  @ApiOperation({ summary: 'Reject a pending quote approval request' })
-  @ApiParam({ name: 'id', description: 'Approval ID', type: Number })
-  @ApiResponse({ status: 200, description: 'Approval request rejected.' })
-  @ApiResponse({ status: 400, description: 'Approval request not pending.' })
-  @ApiResponse({ status: 404, description: 'Approval not found.' })
-  reject(
+  @Roles(...APPROVER_ROLES)
+  async reject(
     @Param('id', ParseIntPipe) id: number,
-    @Body() actionDto: ApprovalActionDto,
+    @Body() dto: ApprovalActionDto,
+    @Req() request: any,
   ) {
-    // TODO: Implement RBAC - Sales Manager approval OR Company Owner approval
-    return this.quoteApprovalService.reject(id, actionDto);
+    await this.assertApprovalTier(id, request);
+    return this.service.reject(id, dto);
   }
 
   @Patch('api/v1/quote-approvals/:id/request-changes')
-  @ApiOperation({ summary: 'Request changes for a pending quote approval' })
-  @ApiParam({ name: 'id', description: 'Approval ID', type: Number })
-  @ApiResponse({ status: 200, description: 'Changes requested.' })
-  @ApiResponse({ status: 400, description: 'Approval request not pending.' })
-  @ApiResponse({ status: 404, description: 'Approval not found.' })
-  requestChanges(
+  @Roles(...APPROVER_ROLES)
+  async requestChanges(
     @Param('id', ParseIntPipe) id: number,
-    @Body() actionDto: ApprovalActionDto,
+    @Body() dto: ApprovalActionDto,
+    @Req() request: any,
   ) {
-    // TODO: Implement RBAC - Sales Manager approval OR Company Owner approval
-    return this.quoteApprovalService.requestChanges(id, actionDto);
+    await this.assertApprovalTier(id, request);
+    return this.service.requestChanges(id, dto);
   }
 
   @Post('api/v1/quote-approvals/:id/comments')
-  @ApiOperation({ summary: 'Add a comment to an approval process' })
-  @ApiParam({ name: 'id', description: 'Approval ID', type: Number })
-  @ApiResponse({ status: 201, description: 'Comment successfully added.' })
-  @ApiResponse({ status: 404, description: 'Approval not found.' })
+  @Roles(...APPROVER_ROLES)
   addComment(
     @Param('id', ParseIntPipe) id: number,
-    @Body() commentDto: ApprovalCommentDto,
+    @Body() dto: ApprovalCommentDto,
   ) {
-    return this.quoteApprovalService.addComment(id, commentDto);
+    return this.service.addComment(id, dto);
   }
 
   @Get('api/v1/quote-approvals/:id/history')
-  @ApiOperation({ summary: 'Get history of actions on an approval request' })
-  @ApiParam({ name: 'id', description: 'Approval ID', type: Number })
-  @ApiResponse({ status: 200, description: 'Return history records.' })
-  @ApiResponse({ status: 404, description: 'Approval not found.' })
+  @Roles(...APPROVER_ROLES)
   getHistory(@Param('id', ParseIntPipe) id: number) {
-    return this.quoteApprovalService.getHistory(id);
+    return this.service.getHistory(id);
   }
 }

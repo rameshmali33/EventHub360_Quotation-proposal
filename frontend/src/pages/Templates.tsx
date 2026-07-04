@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Users, 
-  Settings, HelpCircle, Bell, History as HistoryIcon, Printer, Plus,
-  TrendingUp, Star, MoreVertical, Sparkles, Upload, Edit3, Trash2, CalendarDays
-} from 'lucide-react';
-import CurrentUserAvatar, { getCurrentUserProfile } from '../components/CurrentUserAvatar';
+import { LayoutTemplate, Users, Plus, TrendingUp, Star, MoreVertical, Sparkles, Upload, Edit3, Trash2, CalendarDays } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
+import TopHeader from '../components/TopHeader';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useToast } from '../context/ToastContext';
+import { EVENT_TYPES_CHANGED_EVENT, getActiveEventTypes } from '../utils/eventTypes';
 
 const IMPORTED_TEMPLATES_KEY = 'imported_proposal_templates';
 
@@ -19,29 +17,29 @@ const getFileBadge = (file: File) => {
 const Templates = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const currentUser = getCurrentUserProfile();
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [templates, setTemplates] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All Templates');
   const [openTemplateMenuId, setOpenTemplateMenuId] = useState<string | null>(null);
   const [templatePendingDelete, setTemplatePendingDelete] = useState<any | null>(null);
 
-  const sidebarNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-    { icon: FileText, label: 'Quotations', path: '/quotations' },
-    { icon: Files, label: 'Proposals', path: '/proposals' },
-    { icon: FileText, label: 'Price Book', path: '/price-book' },
-    { icon: LayoutTemplate, label: 'Templates', path: '/templates', active: true },
-    { icon: CheckSquare, label: 'Approvals', path: '/quotations/approval-workbench' },
-  ];
+  const [categories, setCategories] = useState<string[]>([]);
 
-  const categories = [
-    'All Templates',
-    'Luxury Weddings',
-    'Corporate Galas',
-    'Hotel Partnerships',
-    'Custom'
-  ];
+  useEffect(() => {
+    const refreshCategories = () => {
+      const activeNames = getActiveEventTypes().map((eventType) => eventType.name);
+      const nextCategories = ['All Templates', ...activeNames.filter((name) => name !== 'Custom'), 'Custom'];
+      setCategories(nextCategories);
+      setActiveCategory((current) => nextCategories.includes(current) ? current : 'All Templates');
+    };
+    refreshCategories();
+    window.addEventListener(EVENT_TYPES_CHANGED_EVENT, refreshCategories);
+    window.addEventListener('storage', refreshCategories);
+    return () => {
+      window.removeEventListener(EVENT_TYPES_CHANGED_EVENT, refreshCategories);
+      window.removeEventListener('storage', refreshCategories);
+    };
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem(IMPORTED_TEMPLATES_KEY);
@@ -109,122 +107,28 @@ const Templates = () => {
     reader.readAsDataURL(file);
   };
 
+  const normalizeCategory = (value: string) => value
+    .toLowerCase()
+    .replace(/\bluxury\b/g, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.replace(/s$/, ''))
+    .join(' ');
+
   const visibleTemplates = activeCategory === 'All Templates'
     ? templates
-    : templates.filter((template) => template.category === activeCategory);
+    : templates.filter((template) => normalizeCategory(template.category || 'Custom') === normalizeCategory(activeCategory));
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans relative overflow-hidden">
       
-      {/* ========================================== */}
-      {/* LEFT SIDEBAR */}
-      {/* ========================================== */}
-      <div className="w-[260px] bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-[#ECECF1] z-10 shadow-[2px_0_8px_rgba(0,0,0,0.02)] hidden lg:flex">
-        <div className="p-6 pb-8 border-b border-[#ECECF1]">
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-            <span className="text-red-700">Event</span>Hub360
-          </h1>
-          <p className="text-[10px] text-gray-500 font-bold mt-1 uppercase tracking-widest">Enterprise Concierge</p>
-        </div>
+      <Sidebar />
 
-        <div className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {sidebarNavItems.map((item: any, index: any) => {
-            const Icon = item.icon;
-            const isActive = item.active;
-            return (
-              <button
-                key={index}
-                onClick={() => navigate(item.path)}
-                className={`w-full flex items-center h-12 px-4 rounded-[14px] transition-all duration-200 group relative ${
-                  isActive ? 'bg-[#F8F5FF] text-red-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'
-                }`}
-              >
-                <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-red-700' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                <span className="text-[15px]">{item.label}</span>
-                {isActive && <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-red-700 rounded-l-full" />}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="p-6 pt-4 border-t border-[#ECECF1] space-y-4">
-          <div className="space-y-1">
-            <button onClick={() => navigate('/settings')} className="w-full flex items-center h-10 px-4 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-              <Settings className="w-5 h-5 mr-3 text-gray-400" />
-              <span className="text-[15px]">Settings</span>
-            </button>
-            <button onClick={() => navigate('/support')} className="w-full flex items-center h-10 px-4 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors font-medium">
-              <HelpCircle className="w-5 h-5 mr-3 text-gray-400" />
-              <span className="text-[15px]">Support</span>
-            </button>
-          </div>
-          <div onClick={() => navigate('/profile')} className="mt-4 flex items-center gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded-[14px] transition-colors">
-            <CurrentUserAvatar />
-            <div>
-              <p className="text-sm font-bold text-gray-900 leading-tight">{currentUser.fullName}</p>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Admin</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================== */}
-      {/* MAIN CONTENT AREA */}
-      {/* ========================================== */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
-        
-        {/* TOP HEADER */}
-        <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between shrink-0">
-          <div className="w-[200px]">
-            <h2 className="text-[20px] font-bold text-red-700 tracking-tight leading-tight">
-              Quotation<br/>Management
-            </h2>
-          </div>
-
-          <div className="flex-1 flex items-center justify-center gap-8 h-full">
-            <div className="flex items-center h-full gap-6">
-              {[
-                { label: 'All Quotes', path: '/quotations/master' },
-                { label: 'Drafts', path: '/quotations/drafts' },
-                { label: 'Pending Approval', path: '/quotations/approval-workbench' },
-                { label: 'History', path: '/quotations/history-center' },
-              ].map((tab: any, idx: any) => (
-                <button
-                  key={idx}
-                  onClick={() => navigate(tab.path)}
-                  className={`h-full flex items-center relative text-[15px] font-semibold transition-colors text-gray-600 hover:text-gray-900`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-5">
-            <button onClick={() => navigate('/notifications')} className="relative text-gray-500 hover:text-gray-700 transition-colors" aria-label="Open notifications">
-              <Bell className="w-[22px] h-[22px]" />
-            </button>
-            <button onClick={() => navigate('/activity-timeline')} className="relative text-gray-500 hover:text-gray-700 transition-colors" aria-label="Open activity timeline">
-              <HistoryIcon className="w-[22px] h-[22px]" />
-            </button>
-            <button onClick={() => window.print()} className="relative text-gray-500 hover:text-gray-700 transition-colors" aria-label="Print page">
-              <Printer className="w-[22px] h-[22px]" />
-            </button>
-            <div className="w-px h-8 bg-gray-200 mx-2"></div>
-            <button 
-              onClick={() => navigate('/quotations/new')}
-              className="h-[42px] px-6 flex items-center gap-2 bg-gradient-to-r from-red-700 to-orange-400 text-white rounded-full font-bold text-[14px] shadow-sm hover:shadow-md transition-all"
-            >
-              Create New
-            </button>
-          </div>
-        </div>
-
-        {/* SCROLLABLE MAIN */}
+        <TopHeader />
         <main className="flex-1 overflow-y-auto p-10 pb-24">
           <div className="max-w-[1200px] mx-auto">
             
-            {/* PAGE HEADER */}
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-2xl">
                 <h1 className="text-[36px] font-bold text-gray-900 tracking-tight leading-tight mb-2">
@@ -269,7 +173,6 @@ const Templates = () => {
               </div>
             </div>
 
-            {/* CATEGORY TABS */}
             <div className="flex items-center gap-3 mb-10 overflow-x-auto pb-2 scrollbar-hide">
               {categories.map((cat: string, idx: any) => (
                 <button
@@ -286,7 +189,6 @@ const Templates = () => {
               ))}
             </div>
 
-            {/* TEMPLATE GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {visibleTemplates.length === 0 && (
                 <div className="md:col-span-2 lg:col-span-3 xl:col-span-4 rounded-[24px] border border-[#ECECF1] bg-white p-8 text-center">
@@ -298,10 +200,8 @@ const Templates = () => {
                 </div>
               )}
               
-              {/* NORMAL TEMPLATES */}
               {visibleTemplates.map((template: any) => (
                 <div key={template.id} className="bg-white rounded-[28px] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1] hover:shadow-md transition-shadow flex flex-col">
-                  {/* Image Area */}
                   <div 
                     onClick={() => navigate(`/templates/${template.id}`)}
                     className="w-full aspect-[4/5] rounded-[20px] mb-4 relative overflow-hidden bg-gray-100 cursor-pointer group"
@@ -322,7 +222,6 @@ const Templates = () => {
                     </div>
                   </div>
 
-                  {/* Content Area */}
                   <div className="px-2 flex-1 flex flex-col">
                     <div className="flex items-start justify-between mb-3">
                       <h3 
@@ -400,7 +299,6 @@ const Templates = () => {
                 </div>
               ))}
 
-              {/* CREATE CUSTOM CARD */}
               <div 
                 onClick={() => navigate('/templates/custom')}
                 className="bg-white rounded-[28px] p-6 border-2 border-dashed border-[#ECECF1] hover:border-red-300 hover:bg-red-50/30 transition-colors flex flex-col items-center justify-center text-center cursor-pointer min-h-[400px]"
@@ -418,7 +316,6 @@ const Templates = () => {
           </div>
         </main>
         
-        {/* FLOATING AI BUTTON */}
         <button 
           onClick={() => navigate('/templates/ai-generator')}
           className="fixed bottom-8 right-8 h-14 px-5 rounded-full bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 z-50 group"

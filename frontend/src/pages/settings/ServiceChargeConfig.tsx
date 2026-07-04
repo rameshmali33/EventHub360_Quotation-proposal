@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Receipt, Plus, Edit2, Trash2, MapPin, Calendar, Star
-} from 'lucide-react';
+import { ArrowLeft, Receipt, Plus, Edit2, Trash2, MapPin, Calendar, Star } from 'lucide-react';
 
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
   <button 
@@ -45,7 +43,6 @@ const ServiceChargeConfig = () => {
               </div>
             </div>
 
-            {/* Standard Config */}
             <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1]">
               <div className="flex items-center justify-between mb-6 pb-6 border-b border-[#ECECF1]">
                 <div className="flex items-center gap-3">
@@ -81,7 +78,6 @@ const ServiceChargeConfig = () => {
               </div>
             </div>
 
-            {/* Exceptions & Specific Rules */}
             <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] overflow-hidden">
               <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
                 <h2 className="text-[18px] font-bold text-gray-900">Rule Exceptions & Markups</h2>

@@ -5,10 +5,7 @@ import TopHeader from '../components/TopHeader';
 import { approvalService } from '../services/approvalService';
 import { quotationService } from '../services/quotationService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import { 
-  CheckCircle2, XCircle, MessageSquare, Clock, AlertTriangle, 
-  ShieldCheck, ArrowRight, Activity, Loader, X
-} from 'lucide-react';
+import { CheckCircle2, XCircle, MessageSquare, Clock, AlertTriangle, ShieldCheck, Activity, Loader, X } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
 const formatCurrency = (val: number) => {
@@ -199,7 +196,6 @@ const ApprovalWorkbench = () => {
               <p className="text-[15px] text-gray-500 mt-1">Review pending quotation approvals and audit previous approval decisions.</p>
             </div>
 
-            {/* SLA Tracking Dashboard */}
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[16px] font-bold text-gray-900 flex items-center gap-2"><Activity className="w-5 h-5 text-gray-400" /> SLA Tracking</h3>
@@ -344,11 +340,9 @@ const ApprovalWorkbench = () => {
         </main>
       </div>
 
-      {/* Custom Action Modal Overlay */}
       {actionModal && actionModal.isOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-[24px] w-full max-w-[480px] shadow-2xl overflow-hidden border border-[#ECECF1] animate-in zoom-in-95 duration-200">
-            {/* Header */}
             <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between bg-gray-50/50">
               <h3 className="text-[18px] font-bold text-gray-900">
                 {actionModal.title}
@@ -361,7 +355,6 @@ const ApprovalWorkbench = () => {
               </button>
             </div>
 
-            {/* Body */}
             <div className="p-6 space-y-4">
               <p className="text-sm font-medium text-gray-500">
                 {actionModal.description}
@@ -382,7 +375,6 @@ const ApprovalWorkbench = () => {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="px-6 py-4 bg-gray-50/50 border-t border-[#ECECF1] flex justify-end gap-3">
               <button
                 onClick={() => setActionModal(null)}

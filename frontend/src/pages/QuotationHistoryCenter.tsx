@@ -1,13 +1,10 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import { quotationService } from '../services/quotationService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import {
-  History, Download, Search, Filter, SplitSquareHorizontal,
-  FileText, User, CheckCircle2, FileEdit, Send
-} from 'lucide-react';
+import { History, Download, Search, Filter, SplitSquareHorizontal, FileText, User, CheckCircle2, FileEdit, Send } from 'lucide-react';
 
 const QuotationHistoryCenter = () => {
   const navigate = useNavigate();

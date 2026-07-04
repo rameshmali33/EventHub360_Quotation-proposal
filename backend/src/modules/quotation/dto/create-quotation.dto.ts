@@ -1,4 +1,12 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsDateString, ValidateNested, IsArray } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsDateString,
+  ValidateNested,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateQuotationLineDto } from './create-quotation-line.dto';
@@ -20,22 +28,35 @@ export class CreateQuotationDto {
   @IsNotEmpty()
   lead_id: number | bigint;
 
-  @ApiPropertyOptional({ description: 'The currency code', example: 'INR', default: 'INR' })
+  @ApiPropertyOptional({
+    description: 'The currency code',
+    example: 'INR',
+    default: 'INR',
+  })
   @IsString()
   @IsOptional()
   currency?: string = 'INR';
 
-  @ApiPropertyOptional({ description: 'Expiration date of the quotation', example: '2026-07-31T23:59:59.000Z' })
+  @ApiPropertyOptional({
+    description: 'Expiration date of the quotation',
+    example: '2026-07-31T23:59:59.000Z',
+  })
   @IsDateString()
   @IsOptional()
   expires_at?: string;
 
-  @ApiPropertyOptional({ description: 'Parent quotation ID for version comparisons', example: 1 })
+  @ApiPropertyOptional({
+    description: 'Parent quotation ID for version comparisons',
+    example: 1,
+  })
   @IsInt()
   @IsOptional()
   parent_quotation_id?: number | bigint;
 
-  @ApiPropertyOptional({ description: 'Array of quotation lines', type: [CreateQuotationLineDto] })
+  @ApiPropertyOptional({
+    description: 'Array of quotation lines',
+    type: [CreateQuotationLineDto],
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateQuotationLineDto)

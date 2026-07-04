@@ -4,8 +4,8 @@ export const qtnDashboardService = {
   async getStats() {
     return fetchJson('/qtn/dashboard/stats');
   },
-  async getMonthlyQuotations() {
-    return fetchJson('/qtn/dashboard/monthly-quotations');
+  async getMonthlyQuotations(months = 12) {
+    return fetchJson(`/qtn/dashboard/monthly-quotations?months=${months}`);
   },
   async getStatusSummary() {
     return fetchJson('/qtn/dashboard/status-summary');

@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import Pagination from '../components/Pagination';
 import { quotationService } from '../services/quotationService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import { 
-  Loader, Search, Filter, ArrowUpDown, MoreVertical, 
-  CheckCircle2, ChevronRight
-} from 'lucide-react';
+import { Loader, Search, Filter, MoreVertical, CheckCircle2, ChevronRight } from 'lucide-react';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
-};
-
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
 const formatActivityTime = (dateStr: string) => {
@@ -123,10 +115,8 @@ const PendingQuotationsCenter = () => {
               </button>
             </div>
 
-            {/* Quote Aging Report & Follow-Up Queue */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               
-              {/* Aging Report */}
               <div className="xl:col-span-2 bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                 <h3 className="text-[16px] font-bold text-gray-900 mb-6">Quote Aging Report</h3>
                 <div className="grid grid-cols-4 gap-4">
@@ -143,7 +133,6 @@ const PendingQuotationsCenter = () => {
                 </div>
               </div>
 
-              {/* Follow-Up Queue */}
               <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-[16px] font-bold text-gray-900">Follow-Up Queue</h3>
@@ -173,7 +162,6 @@ const PendingQuotationsCenter = () => {
 
             </div>
 
-            {/* Active Quotations Table */}
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] min-h-[350px] flex flex-col justify-between">
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

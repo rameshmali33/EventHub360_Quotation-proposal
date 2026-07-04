@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Users, MessageSquare, Paperclip, Send, File, 
-  MoreVertical, Bell, Clock
-} from 'lucide-react';
+import { ArrowLeft, MessageSquare, Paperclip, Send, File, MoreVertical, Bell, Clock } from 'lucide-react';
 
 const DraftCollaboration = () => {
   const navigate = useNavigate();
@@ -37,7 +34,6 @@ const DraftCollaboration = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Chat Area */}
               <div className="lg:col-span-2 bg-white rounded-[24px] shadow-sm border border-[#ECECF1] flex flex-col h-[600px]">
                 <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -104,7 +100,6 @@ const DraftCollaboration = () => {
                 </div>
               </div>
 
-              {/* Sidebar Info */}
               <div className="space-y-6">
                 
                 <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] p-6">

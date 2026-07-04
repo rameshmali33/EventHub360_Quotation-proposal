@@ -1,10 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Bell, Mail, MessageSquare, Smartphone, Clock, AlertTriangle
-} from 'lucide-react';
+import { ArrowLeft, Bell, Mail, MessageSquare, Smartphone, Clock, AlertTriangle } from 'lucide-react';
 
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
   <button 
@@ -89,7 +87,6 @@ const NotificationPreferences = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Approvals & Reminders */}
               <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1]">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#ECECF1]">
                   <div className="w-8 h-8 rounded-[12px] bg-purple-50 flex items-center justify-center text-purple-600">
@@ -124,7 +121,6 @@ const NotificationPreferences = () => {
                 </div>
               </div>
 
-              {/* Escalations */}
               <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1]">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#ECECF1]">
                   <div className="w-8 h-8 rounded-[12px] bg-red-50 flex items-center justify-center text-red-600">

@@ -1,8 +1,23 @@
 import { fetchJson } from './api';
 
 export const catalogService = {
-  async getPriceBooks() {
-    return fetchJson('/price-books');
+  async getPriceBooks(includeInactive = false) {
+    return fetchJson(`/price-books${includeInactive ? '?includeInactive=true&limit=100' : '?limit=100'}`);
+  },
+  async createPriceBook(payload: any) {
+    return fetchJson('/price-books', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  async updatePriceBook(priceBookId: number, payload: any) {
+    return fetchJson(`/price-books/${priceBookId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+  async deletePriceBook(priceBookId: number) {
+    return fetchJson(`/price-books/${priceBookId}`, { method: 'DELETE' });
   },
   async getRateCards(priceBookId: number) {
     return fetchJson(`/price-books/${priceBookId}/rate-cards`);

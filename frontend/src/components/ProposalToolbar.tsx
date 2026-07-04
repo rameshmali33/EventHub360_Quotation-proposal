@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ZoomOut, ZoomIn, Printer, Download, Share2, Loader, Send } from 'lucide-react';
+import { ArrowLeft, ZoomOut, ZoomIn, Download, Share2, Loader, Send } from 'lucide-react';
 import { proposalService, Proposal } from '../services/proposalService';
 import { useToast } from '../context/ToastContext';
 
@@ -13,7 +13,6 @@ const ProposalToolbar: React.FC<ProposalToolbarProps> = ({ proposal, quotationId
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [sending, setSending] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
 
   const handleSendToClient = async () => {
     if (!quotationId || !proposal) {
@@ -21,10 +20,8 @@ const ProposalToolbar: React.FC<ProposalToolbarProps> = ({ proposal, quotationId
       return;
     }
     setSending(true);
-    setStatus(null);
     try {
-      const updated = await proposalService.sendProposalToClient(quotationId);
-      setStatus(`Sent! (Status: ${updated.status})`);
+      await proposalService.sendProposalToClient(quotationId);
       showToast(`Proposal successfully sent to client email (client@example.com)`, 'success');
       setTimeout(() => {
         window.location.reload();
@@ -41,7 +38,6 @@ const ProposalToolbar: React.FC<ProposalToolbarProps> = ({ proposal, quotationId
   return (
     <div className="h-[72px] bg-white border-b border-[#ECECF1] px-6 flex items-center justify-between shrink-0 sticky top-0 z-30">
       
-      {/* Left */}
       <div className="flex items-center gap-4 w-[350px]">
         <button 
           onClick={() => {
@@ -79,7 +75,6 @@ const ProposalToolbar: React.FC<ProposalToolbarProps> = ({ proposal, quotationId
         </div>
       </div>
 
-      {/* Center - Zoom */}
       <div className="flex-1 flex justify-center">
         <div className="flex items-center bg-[#F8F9FC] rounded-full px-2 py-1 border border-[#ECECF1]">
           <button className="p-1.5 hover:bg-white rounded-full transition-colors text-gray-500">
@@ -92,12 +87,9 @@ const ProposalToolbar: React.FC<ProposalToolbarProps> = ({ proposal, quotationId
         </div>
       </div>
 
-      {/* Right */}
       <div className="flex items-center justify-end gap-6 w-[350px]">
         <div className="flex items-center gap-4 text-gray-600">
-          <button className="hover:text-gray-900 transition-colors">
-            <Printer className="w-5 h-5" />
-          </button>
+
           <button className="hover:text-gray-900 transition-colors">
             <Download className="w-5 h-5" />
           </button>

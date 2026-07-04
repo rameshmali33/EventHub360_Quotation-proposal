@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
@@ -103,7 +103,7 @@ const EventTypesMaster = () => {
                 </button>
                 <div>
                   <h1 className="text-[28px] font-bold text-gray-900 tracking-tight">Event Type Master</h1>
-                  <p className="text-[15px] text-gray-500 mt-1">Create, edit, deactivate, or delete event types used while creating quotations.</p>
+                  <p className="text-[15px] text-gray-500 mt-1">Create, edit, deactivate, or delete event types used in quotations and template categories.</p>
                 </div>
               </div>
               <button onClick={openCreate} className="h-11 px-5 bg-gradient-to-r from-red-700 to-orange-400 text-white rounded-full font-bold text-[14px] shadow-sm hover:shadow-md transition-all flex items-center gap-2 self-start md:self-auto">
@@ -122,7 +122,7 @@ const EventTypesMaster = () => {
               </div>
               <div className="bg-white border border-[#ECECF1] rounded-[20px] p-5 shadow-sm">
                 <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400">Used In</p>
-                <p className="text-[18px] font-black text-gray-900 mt-3">Create Quotation</p>
+                <p className="text-[18px] font-black text-gray-900 mt-3">Quotations & Templates</p>
               </div>
             </div>
 
@@ -134,7 +134,7 @@ const EventTypesMaster = () => {
                   </div>
                   <div>
                     <h2 className="text-[18px] font-bold text-gray-900">Event Type Directory</h2>
-                    <p className="text-[12px] font-semibold text-gray-500">Only active types appear in the quotation wizard.</p>
+                    <p className="text-[12px] font-semibold text-gray-500">Only active types appear in quotation and template category selectors.</p>
                   </div>
                 </div>
                 <div className="relative sm:w-[320px]">

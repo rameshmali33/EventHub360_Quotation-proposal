@@ -1,7 +1,7 @@
-import React from 'react';
+
 import DocumentThumbnail from './DocumentThumbnail';
 
-const DocumentMap = ({ pages, setPages, activePageId, onPageSelect  }: any) => {
+const DocumentMap = ({ pages, activePageId, onPageSelect }: any) => {
   return (
     <div className="w-[22%] min-w-[240px] max-w-[280px] bg-[#F4F5FB] border-r border-[#ECECF1] h-full flex flex-col shrink-0">
       <div className="p-6 pb-2 shrink-0">

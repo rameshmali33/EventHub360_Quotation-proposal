@@ -1,20 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePriceBookDto, UpdatePriceBookDto } from './dto/create-price-book.dto';
+import {
+  CreatePriceBookDto,
+  UpdatePriceBookDto,
+} from './dto/create-price-book.dto';
 import { CatalogListQueryDto, SortOrder } from './dto/catalog-list-query.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 
 function serializeDbObject(obj: any): any {
   if (!obj) return obj;
   if (Array.isArray(obj)) {
-    return obj.map(item => serializeDbObject(item));
+    return obj.map((item) => serializeDbObject(item));
   }
   const serialized = { ...obj };
   for (const key of Object.keys(serialized)) {
     if (typeof serialized[key] === 'bigint') {
       serialized[key] = Number(serialized[key]);
-    } else if (serialized[key] && typeof serialized[key].toNumber === 'function') {
+    } else if (
+      serialized[key] &&
+      typeof serialized[key].toNumber === 'function'
+    ) {
       serialized[key] = serialized[key].toNumber();
-    } else if (typeof serialized[key] === 'object' && serialized[key] !== null && !(serialized[key] instanceof Date)) {
+    } else if (
+      typeof serialized[key] === 'object' &&
+      serialized[key] !== null &&
+      !(serialized[key] instanceof Date)
+    ) {
       serialized[key] = serializeDbObject(serialized[key]);
     }
   }
@@ -41,8 +51,13 @@ export class PriceBookService {
   }
 
   async findAll(query: CatalogListQueryDto) {
-    const search = query.search ? { name: { contains: query.search, mode: 'insensitive' as const } } : {};
-    const where = { is_active: true, ...search };
+    const search = query.search
+      ? { name: { contains: query.search, mode: 'insensitive' as const } }
+      : {};
+    const where = {
+      ...(query.includeInactive ? {} : { is_active: true }),
+      ...search,
+    };
     const total = await this.prisma.priceBook.count({ where });
 
     const page = Number(query.page) || 1;
@@ -78,12 +93,19 @@ export class PriceBookService {
   }
 
   async update(id: number, updateDto: UpdatePriceBookDto) {
-    await this.findOne(id);
+    const existing = await this.prisma.priceBook.findFirst({
+      where: { price_book_id: BigInt(id) },
+    });
+    if (!existing) {
+      throw new NotFoundException(`Price Book with ID ${id} not found`);
+    }
     const updated = await this.prisma.priceBook.update({
       where: { price_book_id: BigInt(id) },
       data: {
         name: updateDto.name,
-        valid_from: updateDto.validFrom ? new Date(updateDto.validFrom) : undefined,
+        valid_from: updateDto.validFrom
+          ? new Date(updateDto.validFrom)
+          : undefined,
         valid_to: updateDto.validTo ? new Date(updateDto.validTo) : undefined,
         is_active: updateDto.isActive,
         updated_at: new Date(),
@@ -93,7 +115,12 @@ export class PriceBookService {
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    const existing = await this.prisma.priceBook.findFirst({
+      where: { price_book_id: BigInt(id) },
+    });
+    if (!existing) {
+      throw new NotFoundException(`Price Book with ID ${id} not found`);
+    }
     await this.prisma.priceBook.update({
       where: { price_book_id: BigInt(id) },
       data: {
@@ -104,4 +131,3 @@ export class PriceBookService {
     return { message: `Price Book ${id} soft deleted` };
   }
 }
-

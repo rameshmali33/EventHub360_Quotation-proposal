@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import KPICard from '../components/KPICard';
@@ -13,16 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { qtnDashboardService } from '../services/qtnDashboardService';
 import { Loader } from 'lucide-react';
 
-import { 
-  FileText, 
-  Banknote, 
-  Calculator, 
-  Target,
-  FileEdit,
-  Send,
-  CheckCircle,
-  Clock
-} from 'lucide-react';
+import { FileText, Banknote, Target, FileEdit, Send, CheckCircle, Clock } from 'lucide-react';
 
 const formatRevenue = (value: number) => {
   const symbol = '\u20b9';
@@ -56,11 +47,9 @@ const QuotationDashboard = () => {
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans">
       <Sidebar />
       
-      {/* Main Content */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         <TopHeader />
         
-        {/* Scrollable Area */}
         <main className="flex-1 overflow-y-auto p-8">
           <div className="max-w-[1400px] mx-auto space-y-6">
             
@@ -74,7 +63,6 @@ const QuotationDashboard = () => {
               </div>
             ) : (
               <>
-                {/* ROW 1: KPI CARDS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                   <KPICard 
                     title="Pending Quotes" 
@@ -118,7 +106,6 @@ const QuotationDashboard = () => {
                   />
                 </div>
 
-                {/* ROW 2: SUMMARY CARDS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   <SummaryCard icon={FileEdit} value={stats ? String(stats.draftQuotations) : '0'} label="Drafts" iconBg="bg-gray-100" iconColor="text-gray-600" onClick={() => navigate('/quotations/drafts')} />
                   <SummaryCard icon={Send} value={stats ? String(stats.sentQuotations) : '0'} label="Sent" iconBg="bg-blue-50" iconColor="text-blue-600" onClick={() => navigate('/quotations/master?status=sent')} />
@@ -128,7 +115,6 @@ const QuotationDashboard = () => {
               </>
             )}
 
-            {/* ROW 3: CHARTS (70 / 30) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[340px]">
               <div className="lg:col-span-8 h-full">
                 <MonthlyQuotationChart />
@@ -138,7 +124,6 @@ const QuotationDashboard = () => {
               </div>
             </div>
 
-            {/* ROW 4: FUNNEL & APPROVALS (50 / 50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
               <div className="h-full">
                 <ConversionFunnel />
@@ -148,7 +133,6 @@ const QuotationDashboard = () => {
               </div>
             </div>
 
-            {/* ROW 5: TABLE & EXECUTIVES (70 / 30) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[400px]">
               <div className="lg:col-span-8 h-full">
                 <RecentQuotationTable />

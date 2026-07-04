@@ -1,9 +1,0 @@
-import { renderToString } from 'react-dom/server';
-import App from './src/App.jsx';
-
-try {
-  const html = renderToString(<App />);
-  console.log(`RENDER SUCCESSFUL (${html.length} chars)`);
-} catch (e) {
-  console.error("RENDER ERROR:", e);
-}

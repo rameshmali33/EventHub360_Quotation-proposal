@@ -1,10 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, BarChart3, TrendingUp, Clock, AlertTriangle, Users, IndianRupee
-} from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Clock, AlertTriangle, IndianRupee } from 'lucide-react';
 
 const DraftAnalytics = () => {
   const navigate = useNavigate();
@@ -31,7 +29,6 @@ const DraftAnalytics = () => {
               </div>
             </div>
 
-            {/* Top KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
@@ -76,7 +73,6 @@ const DraftAnalytics = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Funnel/Drop-off Chart Placeholder */}
               <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] h-[400px] flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-[18px] font-bold text-gray-900">Draft Drop-off Analysis</h2>
@@ -94,7 +90,6 @@ const DraftAnalytics = () => {
                 </div>
               </div>
 
-              {/* Team Performance Placeholder */}
               <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] h-[400px] flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-[18px] font-bold text-gray-900">Creation Time by User</h2>

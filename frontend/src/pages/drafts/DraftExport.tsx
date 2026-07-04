@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Download, FileText, FileSpreadsheet, Package, CheckCircle2
-} from 'lucide-react';
+import { ArrowLeft, Download, FileText, FileSpreadsheet, Package, CheckCircle2 } from 'lucide-react';
 
 const DraftExport = () => {
   const navigate = useNavigate();

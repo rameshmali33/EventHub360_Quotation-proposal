@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { LayoutGrid, List } from 'lucide-react';
 
 const CategoryTabs = () => {
@@ -9,7 +9,6 @@ const CategoryTabs = () => {
 
   return (
     <div className="bg-white h-[80px] rounded-[24px] shadow-sm border border-[#ECECF1] px-6 flex items-center justify-between mb-8">
-      {/* Left Tabs */}
       <div className="flex items-center gap-2 p-1 bg-gray-50/50 rounded-full border border-[#ECECF1]">
         {tabs.map((tab: any) => (
           <button
@@ -26,10 +25,8 @@ const CategoryTabs = () => {
         ))}
       </div>
 
-      {/* Right Controls */}
       <div className="flex items-center gap-8">
         
-        {/* Toggle */}
         <div className="flex items-center gap-3">
           <span className="text-[14px] font-bold text-gray-700">Seasonal Pricing</span>
           <button 
@@ -46,7 +43,6 @@ const CategoryTabs = () => {
 
         <div className="w-px h-8 bg-[#ECECF1]"></div>
 
-        {/* View Toggles */}
         <div className="flex items-center gap-2 p-1 bg-gray-50/50 rounded-xl border border-[#ECECF1]">
           <button 
             onClick={() => setViewMode('grid')}

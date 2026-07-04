@@ -7,12 +7,19 @@ export class ProposalSignatureDto {
   @IsNotEmpty()
   signerName: string;
 
-  @ApiProperty({ description: 'Signature details/representation (base64 or canvas coordinates)', example: 'data:image/png;base64,...' })
+  @ApiProperty({
+    description:
+      'Signature details/representation (base64 or canvas coordinates)',
+    example: 'data:image/png;base64,...',
+  })
   @IsString()
   @IsNotEmpty()
   signatureData: string;
 
-  @ApiPropertyOptional({ description: 'Optional IP address override', example: '192.168.1.1' })
+  @ApiPropertyOptional({
+    description: 'Optional IP address override',
+    example: '192.168.1.1',
+  })
   @IsString()
   @IsOptional()
   ipAddress?: string;

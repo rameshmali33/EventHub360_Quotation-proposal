@@ -128,7 +128,6 @@ const ProposalGeneratorCard: React.FC<ProposalGeneratorCardProps> = ({ quotation
 
   return (
     <div className="bg-white rounded-[28px] border-2 border-red-100 shadow-[0_8px_30px_rgba(220,38,38,0.08)] p-6 relative overflow-hidden mb-6">
-      {/* Decorative gradient blur */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full blur-3xl opacity-50 pointer-events-none" />
       
       <div className="relative z-10">

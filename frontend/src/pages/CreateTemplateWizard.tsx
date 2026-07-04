@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, CheckCircle2, ChevronRight, FileEdit, Tags, 
-  LayoutTemplate, ListTree, Palette, Eye, CheckCircle, Upload
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ChevronRight, FileEdit, Tags, LayoutTemplate, ListTree, Palette, Eye, CheckCircle, Upload } from 'lucide-react';
 
 const CreateTemplateWizard = () => {
   const navigate = useNavigate();
@@ -32,7 +29,6 @@ const CreateTemplateWizard = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FC] font-sans flex flex-col">
       
-      {/* HEADER */}
       <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-4">
           <button onClick={handleBack} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100">
@@ -58,14 +54,12 @@ const CreateTemplateWizard = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* PROGRESS SIDEBAR */}
         <div className="w-[280px] bg-white border-r border-[#ECECF1] p-8 hidden md:block overflow-y-auto">
           <h3 className="text-[14px] font-bold text-gray-900 mb-8">Setup Progress</h3>
           <div className="relative">
             <div className="absolute left-[15px] top-4 bottom-4 w-px bg-[#ECECF1] z-0"></div>
             <div className="space-y-6 relative z-10">
               {steps.map((step: any) => {
-                const Icon = step.icon;
                 const isCompleted = currentStep > step.id;
                 const isActive = currentStep === step.id;
                 
@@ -92,7 +86,6 @@ const CreateTemplateWizard = () => {
           </div>
         </div>
 
-        {/* MAIN CONTENT AREA */}
         <main className="flex-1 overflow-y-auto p-10 flex items-center justify-center">
           <div className="max-w-[800px] w-full bg-white rounded-[32px] p-10 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
             

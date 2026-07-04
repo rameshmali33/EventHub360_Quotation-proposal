@@ -1,15 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import { quotationService } from '../services/quotationService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import { 
-  LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Users, 
-  Settings, HelpCircle, Bell, History as HistoryIcon, PlusCircle, 
-  CheckCircle, Download, Wallet, ChevronRight, Calendar, MapPin, 
-  ChefHat, Speaker, Flower2, Phone, Mail, FileSignature, Loader
-} from 'lucide-react';
+import { Users, CheckCircle, Download, Wallet, ChevronRight, Calendar, MapPin, ChefHat, Speaker, Flower2, Phone, Mail, FileSignature, Loader } from 'lucide-react';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
@@ -21,7 +16,6 @@ const formatDate = (dateStr: string) => {
 };
 
 const QuoteAcceptedDashboard = () => {
-  const navigate = useNavigate();
   const [showConfetti, setShowConfetti] = useState(true);
   const [acceptedQuote, setAcceptedQuote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -63,7 +57,6 @@ const QuoteAcceptedDashboard = () => {
   return (
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans relative overflow-hidden">
       
-      {/* CSS CONFETTI OVERLAY */}
       {showConfetti && (
         <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden">
           {confettiPieces.map((p: any) => (
@@ -90,11 +83,9 @@ const QuoteAcceptedDashboard = () => {
 
       <Sidebar />
 
-      {/* Main Content Area */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         <TopHeader />
 
-        {/* Scrollable Main */}
         <main className="flex-1 overflow-y-auto p-8 lg:p-10 pb-24">
           <div className="max-w-[1400px] mx-auto space-y-8">
             
@@ -104,9 +95,7 @@ const QuoteAcceptedDashboard = () => {
               </div>
             ) : (
               <>
-                {/* MILESTONE BANNER HERO */}
                 <div className="relative h-auto md:h-[240px] rounded-[32px] overflow-hidden bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-400 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between shadow-[0_8px_30px_rgba(16,185,129,0.2)]">
-                  {/* Background Accent Rings */}
                   <div className="absolute top-[-50%] right-[-10%] w-[500px] h-[500px] rounded-full border-[40px] border-white/10 pointer-events-none"></div>
                   <div className="absolute bottom-[-50%] right-[10%] w-[300px] h-[300px] rounded-full border-[20px] border-white/10 pointer-events-none"></div>
 
@@ -133,10 +122,8 @@ const QuoteAcceptedDashboard = () => {
                   </div>
                 </div>
 
-                {/* DASHBOARD GRID - 3 Columns */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   
-                  {/* CARD 1: TOTAL QUOTE VALUE */}
                   <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1] flex flex-col justify-center">
                     <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-3">Total Quote Value</p>
                     <p className="text-[36px] font-black text-gray-900 tracking-tight leading-none mb-4">{formatCurrency(quoteTotal)}</p>
@@ -146,7 +133,6 @@ const QuoteAcceptedDashboard = () => {
                     </div>
                   </div>
 
-                  {/* CARD 2: EVENT DATE */}
                   <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1] flex flex-col justify-center">
                     <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-3">Event Date</p>
                     <p className="text-[24px] font-bold text-gray-900 tracking-tight leading-none mb-3">{eventDate}</p>
@@ -160,7 +146,6 @@ const QuoteAcceptedDashboard = () => {
                     </div>
                   </div>
 
-                  {/* CARD 3: WORKFLOW ACTIVATION */}
                   <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1] flex flex-col justify-center items-center text-center">
                     <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-4">Workflow Activation</p>
                     <button className="w-full h-[64px] bg-gradient-to-r from-red-600 to-orange-400 hover:from-red-700 hover:to-orange-500 text-white rounded-[20px] font-bold text-[18px] shadow-[0_8px_20px_rgba(220,38,38,0.2)] hover:shadow-[0_10px_25px_rgba(220,38,38,0.3)] transition-all flex flex-col items-center justify-center transform hover:-translate-y-1">
@@ -171,13 +156,10 @@ const QuoteAcceptedDashboard = () => {
 
                 </div>
 
-                {/* TWO COLUMNS LAYOUT FOR BOTTOM SECTION */}
                 <div className="flex flex-col xl:flex-row gap-6">
                   
-                  {/* LEFT COLUMN - VENDORS & SECONDARY ACTIONS */}
                   <div className="flex-1 space-y-6 xl:w-[70%]">
                     
-                    {/* SECONDARY ACTIONS ROW */}
                     <div>
                       <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-4">Secondary Actions</h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -213,7 +195,6 @@ const QuoteAcceptedDashboard = () => {
                       </div>
                     </div>
 
-                    {/* PRIMARY VENDOR LIST */}
                     <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                       <div className="flex items-center justify-between mb-8">
                         <h2 className="text-[20px] font-bold text-gray-900">Primary Vendor List</h2>
@@ -223,7 +204,6 @@ const QuoteAcceptedDashboard = () => {
                       </div>
 
                       <div className="space-y-4">
-                        {/* Vendor 1 */}
                         <div className="group border border-[#ECECF1] rounded-[20px] p-5 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer">
                           <div className="flex items-center gap-5 mb-4 md:mb-0">
                             <div className="w-12 h-12 rounded-[14px] bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100 shrink-0">
@@ -239,7 +219,6 @@ const QuoteAcceptedDashboard = () => {
                           </div>
                         </div>
 
-                        {/* Vendor 2 */}
                         <div className="group border border-[#ECECF1] rounded-[20px] p-5 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer">
                           <div className="flex items-center gap-5 mb-4 md:mb-0">
                             <div className="w-12 h-12 rounded-[14px] bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
@@ -255,7 +234,6 @@ const QuoteAcceptedDashboard = () => {
                           </div>
                         </div>
 
-                        {/* Vendor 3 */}
                         <div className="group border border-[#ECECF1] rounded-[20px] p-5 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer">
                           <div className="flex items-center gap-5 mb-4 md:mb-0">
                             <div className="w-12 h-12 rounded-[14px] bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100 shrink-0">
@@ -282,7 +260,6 @@ const QuoteAcceptedDashboard = () => {
 
                   </div>
 
-                  {/* RIGHT COLUMN - CLIENT ACCOUNT PANEL */}
                   <div className="xl:w-[30%]">
                     <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1] sticky top-6">
                       <h3 className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-6">Client Account</h3>

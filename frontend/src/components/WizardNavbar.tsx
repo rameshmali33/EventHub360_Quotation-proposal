@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HelpCircle, Bell } from 'lucide-react';
 import NotificationDrawer from './NotificationDrawer';
@@ -9,6 +9,7 @@ const WizardNavbar = () => {
     firstName: localStorage.getItem('user_first_name') || 'Ramesh',
     lastName: localStorage.getItem('user_last_name') || 'Mali',
     avatarUrl: localStorage.getItem('user_avatar_url') || '',
+    role: localStorage.getItem('user_role') || 'Team Member',
   });
   const [hasUnread, setHasUnread] = useState(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
@@ -19,6 +20,7 @@ const WizardNavbar = () => {
         firstName: localStorage.getItem('user_first_name') || 'Ramesh',
         lastName: localStorage.getItem('user_last_name') || 'Mali',
         avatarUrl: localStorage.getItem('user_avatar_url') || '',
+        role: localStorage.getItem('user_role') || 'Team Member',
       });
     };
 
@@ -47,7 +49,6 @@ const WizardNavbar = () => {
 
   return (
     <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between sticky top-0 z-20">
-      {/* Left side */}
       <div className="flex items-center">
         <h1 className="text-xl font-bold tracking-tight text-[#B3262E]">
           EventHub360
@@ -58,7 +59,6 @@ const WizardNavbar = () => {
         </h2>
       </div>
 
-      {/* Right side */}
       <div className="flex items-center gap-5">
         <button
           type="button"
@@ -87,7 +87,7 @@ const WizardNavbar = () => {
         >
           <div className="hidden sm:block text-right">
             <p className="text-sm font-bold text-gray-900 leading-tight">{profile.firstName} {profile.lastName}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Administrator</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{profile.role}</p>
           </div>
           {profile.avatarUrl ? (
             <img

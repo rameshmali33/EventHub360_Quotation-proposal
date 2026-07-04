@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import QuotationRow from './QuotationRow';
 import Pagination from './Pagination';
 import ConfirmationModal from './ConfirmationModal';
 import { quotationService } from '../services/quotationService';
-import { Loader, Search, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
+import { Loader, Search, ArrowUpDown, ChevronUp, ChevronDown, Settings2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { canEditDrafts, normalizeRole } from '../utils/permissions';
+import { defaultQuotationStatuses, QuotationStatusMasterItem, statusMasterService } from '../services/statusMasterService';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
@@ -17,6 +21,10 @@ const formatDate = (dateStr: string) => {
 
 const QuotationTable = () => {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const roleCanEdit = canEditDrafts(user?.role);
+  const canManageStatuses = normalizeRole(user?.role) === 'Super Admin';
   const [quotations, setQuotations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,12 +35,23 @@ const QuotationTable = () => {
 
   const [searchVal, setSearchVal] = useState('');
   const [statusVal, setStatusVal] = useState('');
+  const [statusOptions, setStatusOptions] = useState<QuotationStatusMasterItem[]>(defaultQuotationStatuses);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [openActionMenuId, setOpenActionMenuId] = useState<number | null>(null);
   const [quotationPendingDelete, setQuotationPendingDelete] = useState<any | null>(null);
   const [deletingQuotation, setDeletingQuotation] = useState(false);
+
+  useEffect(() => {
+    statusMasterService.list()
+      .then((response) => {
+        if (response.data?.length) setStatusOptions(response.data);
+      })
+      .catch(() => {
+        setStatusOptions(defaultQuotationStatuses);
+      });
+  }, []);
 
   // Debounce search input
   useEffect(() => {
@@ -59,7 +78,6 @@ const QuotationTable = () => {
       sortOrder
     })
       .then(res => {
-        console.log("Loaded quotations from backend", res);
         setQuotations(res.data || []);
         setTotalItems(res.total || 0);
         if (res.limit) setLimit(res.limit);
@@ -151,7 +169,6 @@ const QuotationTable = () => {
   return (
     <div className="bg-[#F7F8FC] rounded-[28px] border border-[#ECECF1] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col min-h-[400px]">
       
-      {/* Filter Toolbar */}
       <div id="quotation-filters" className="p-6 border-b border-[#ECECF1] bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
           <div className="relative flex-1 max-w-md">
@@ -165,20 +182,29 @@ const QuotationTable = () => {
               className="w-full pl-9 pr-4 py-2.5 bg-[#F8F9FC] border border-[#ECECF1] rounded-xl text-[14px] font-medium text-gray-900 focus:outline-none focus:border-red-300" 
             />
           </div>
-          <select
-            value={statusVal}
-            onChange={e => setStatusVal(e.target.value)}
-            className="px-4 py-2.5 bg-[#F8F9FC] border border-[#ECECF1] rounded-xl text-[14px] font-bold text-gray-700 focus:outline-none focus:border-red-300"
-          >
-            <option value="">All Statuses</option>
-            <option value="DRAFT">Draft</option>
-            <option value="SENT">Sent</option>
-            <option value="PENDING_APPROVAL">Pending Approval</option>
-            <option value="APPROVED">Approved</option>
-            <option value="ACCEPTED">Accepted</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="EXPIRED">Expired</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              value={statusVal}
+              onChange={e => setStatusVal(e.target.value)}
+              className="px-4 py-2.5 bg-[#F8F9FC] border border-[#ECECF1] rounded-xl text-[14px] font-bold text-gray-700 focus:outline-none focus:border-red-300"
+            >
+              <option value="">All Statuses</option>
+              {statusOptions.map((status) => (
+                <option key={status.code} value={status.code}>{status.label}</option>
+              ))}
+            </select>
+            {canManageStatuses && (
+              <button
+                type="button"
+                onClick={() => navigate('/settings/quotation-statuses')}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#ECECF1] bg-white text-gray-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+                aria-label="Manage quotation statuses"
+                title="Manage quotation statuses"
+              >
+                <Settings2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -231,13 +257,14 @@ const QuotationTable = () => {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {mappedData.map((quote: any, idx: any) => (
+              {mappedData.map((quote: any) => (
                 <QuotationRow
                   key={quote.id}
                   quotation={quote}
                   openMenuId={openActionMenuId}
                   setOpenMenuId={setOpenActionMenuId}
                   onDelete={setQuotationPendingDelete}
+                  canEdit={roleCanEdit && ['DRAFT', 'CHANGES_REQUESTED'].includes(String(quote.status).toUpperCase())}
                 />
               ))}
             </tbody>

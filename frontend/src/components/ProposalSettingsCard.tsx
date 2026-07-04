@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const Toggle = ({ label, defaultChecked = false  }: any) => {
   const [checked, setChecked] = useState(defaultChecked);

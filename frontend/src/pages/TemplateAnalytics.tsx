@@ -1,10 +1,6 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Users, 
-  Settings, HelpCircle, Bell, ArrowLeft, TrendingUp, TrendingDown,
-  BarChart2, IndianRupee, Target, Award
-} from 'lucide-react';
+import { LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Bell, ArrowLeft, TrendingUp, BarChart2, IndianRupee, Target, Award } from 'lucide-react';
 import CurrentUserAvatar from '../components/CurrentUserAvatar';
 
 const TemplateAnalytics = () => {
@@ -21,7 +17,6 @@ const TemplateAnalytics = () => {
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans">
-      {/* SIDEBAR */}
       <div className="w-[260px] bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-[#ECECF1] z-10 hidden lg:flex">
         <div className="p-6 pb-8 border-b border-[#ECECF1]">
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">
@@ -49,10 +44,8 @@ const TemplateAnalytics = () => {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         
-        {/* HEADER */}
         <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate('/templates')} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100">
@@ -86,7 +79,6 @@ const TemplateAnalytics = () => {
               </select>
             </div>
 
-            {/* METRICS */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                 <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
@@ -132,7 +124,6 @@ const TemplateAnalytics = () => {
               </div>
             </div>
 
-            {/* CHARTS PLACEHOLDER */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1]">
                 <h3 className="text-[18px] font-bold text-gray-900 mb-6">Monthly Usage Trend</h3>

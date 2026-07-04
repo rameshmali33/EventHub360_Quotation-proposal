@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Loader } from 'lucide-react';
 import { qtnDashboardService } from '../services/qtnDashboardService';
@@ -69,7 +69,6 @@ const QuoteStatusChart = () => {
               </PieChart>
             </ResponsiveContainer>
             
-            {/* Center Text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-3xl font-bold text-gray-900 leading-none">{totalItems}</span>
               <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Total Items</span>
@@ -78,7 +77,6 @@ const QuoteStatusChart = () => {
         )}
       </div>
 
-      {/* Legend */}
       {!loading && !error && data.length > 0 && (
         <div className="grid grid-cols-2 gap-y-4 gap-x-2 mt-4 px-2 overflow-y-auto max-h-[100px]">
           {data.map((item: any, index: any) => (

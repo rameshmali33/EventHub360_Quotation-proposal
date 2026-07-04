@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
@@ -7,6 +7,8 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import { quotationService } from '../services/quotationService';
 import { proposalService } from '../services/proposalService';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { canEditDrafts, canSendToClient } from '../utils/permissions';
 import { Loader, Search, Filter, Download, MoreVertical, ChevronRight, Eye, FileText, Trash2, X } from 'lucide-react';
 
 const formatCurrency = (val: number) => {
@@ -28,6 +30,9 @@ const normalizeTabFromStatus = (status: string | null) => {
 const QuotationsMasterList = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const roleCanEdit = canEditDrafts(user?.role);
+  const roleCanSend = canSendToClient(user?.role);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => normalizeTabFromStatus(searchParams.get('status')));
   const [searchVal, setSearchVal] = useState('');
@@ -86,8 +91,6 @@ const QuotationsMasterList = () => {
       status: queryStatus 
     })
       .then(res => {
-        console.log("Loaded quotations from backend", res);
-        
         // Map backend fields exactly
         const mapped = (res.data || []).map((q: any) => {
           const subtotal = Number(q.subtotal) || 0;
@@ -339,10 +342,10 @@ const QuotationsMasterList = () => {
                               <button type="button" title="More actions" className="p-2 text-gray-400 hover:text-gray-900 transition-colors" onClick={() => setActionMenuId(actionMenuId === quoteId ? null : quoteId)}><MoreVertical className="w-5 h-5" /></button>
                               {actionMenuId === quoteId && (
                                 <div className="absolute right-0 top-10 z-30 w-52 rounded-2xl border border-[#ECECF1] bg-white p-2 text-left shadow-xl">
-                                  <button type="button" onClick={() => navigate(`/quotation-builder?id=${quote.quotation_id}`)} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"><Eye className="w-4 h-4" /> View / Edit</button>
-                                  <button type="button" onClick={() => handleGenerateProposal(quote)} disabled={String(quote.status || '').toUpperCase() !== 'APPROVED'} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-white flex items-center gap-2"><FileText className="w-4 h-4" /> {String(quote.status || '').toUpperCase() === 'APPROVED' ? 'Generate Proposal' : 'Approval Required'}</button>
+                                  <button type="button" onClick={() => navigate(`/quotation-builder?id=${quote.quotation_id}`)} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"><Eye className="w-4 h-4" /> {roleCanEdit ? 'View / Edit' : 'View'}</button>
+                                  {roleCanSend && (<button type="button" onClick={() => handleGenerateProposal(quote)} disabled={String(quote.status || '').toUpperCase() !== 'APPROVED'} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-white flex items-center gap-2"><FileText className="w-4 h-4" /> {String(quote.status || '').toUpperCase() === 'APPROVED' ? 'Generate Proposal' : 'Approval Required'}</button>)}
                                   <button type="button" onClick={() => downloadCsv(`${quote.quoteNumber}.csv`, [quote])} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"><Download className="w-4 h-4" /> Export Quote</button>
-                                  <button type="button" onClick={() => { setDeleteTarget(quote); setActionMenuId(null); }} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"><Trash2 className="w-4 h-4" /> Delete</button>
+                                  {roleCanEdit && ['DRAFT', 'CHANGES_REQUESTED'].includes(String(quote.status || '').toUpperCase()) && (<button type="button" onClick={() => { setDeleteTarget(quote); setActionMenuId(null); }} className="w-full rounded-xl px-4 py-3 text-[13px] font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"><Trash2 className="w-4 h-4" /> Delete</button>)}
                                 </div>
                               )}
                             </div>

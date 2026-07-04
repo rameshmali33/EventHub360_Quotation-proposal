@@ -1,10 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Target, ShieldAlert, TrendingDown, ShieldCheck, Zap
-} from 'lucide-react';
+import { ArrowLeft, Target, ShieldAlert, TrendingDown, Zap } from 'lucide-react';
 
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
   <button 
@@ -39,7 +37,6 @@ const BusinessRulesCenter = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Profitability & Discounts */}
               <div className="space-y-6">
                 
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
@@ -86,7 +83,6 @@ const BusinessRulesCenter = () => {
 
               </div>
 
-              {/* Automation & Risk */}
               <div className="space-y-6">
                 
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">

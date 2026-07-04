@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, PlusCircle, Check, ChevronDown } from 'lucide-react';
+import { Trash2, PlusCircle, Check } from 'lucide-react';
 
 interface CateringTableEditorProps {
   items: any[];
@@ -58,7 +58,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
 
   return (
     <div className="flex flex-col">
-      {/* 1. Catering Package Selector */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-red-50/10 p-5 rounded-[20px] border border-red-100">
         <div className="flex items-center gap-3">
           <span className="text-[13px] font-bold text-gray-500 uppercase tracking-wider">Catering Package:</span>
@@ -85,7 +84,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
         )}
       </div>
 
-      {/* 2. Items Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -112,7 +110,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
 
               return (
                 <tr key={item.id} className="border-b border-[#ECECF1] hover:bg-gray-50/50 transition-colors group">
-                  {/* Searchable Dropdown Column */}
                   <td className="py-4 pr-4 relative">
                     <div className="relative">
                       <input 
@@ -132,7 +129,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
                       
                       {activeDropdownId === item.id && (
                         <>
-                          {/* Close overlay on clicking outside */}
                           <div 
                             className="fixed inset-0 z-20 cursor-default" 
                             onClick={() => setActiveDropdownId(null)}
@@ -170,7 +166,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
                     </div>
                   </td>
                   
-                  {/* Right-Aligned Numeric Inputs */}
                   <td className="py-4 px-4">
                     <div className="flex justify-end">
                       <input 
@@ -216,7 +211,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
                     </div>
                   </td>
                   
-                  {/* Highlighted Total */}
                   <td className="py-4 pl-4 text-right">
                     <span className="text-[15px] font-bold text-gray-900">
                       ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -237,7 +231,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
         </table>
       </div>
 
-      {/* 3. Helper Quick Adds */}
       <div className="flex flex-wrap items-center gap-2 mt-4 mb-2 bg-[#F8F9FC] p-3.5 rounded-[16px] border border-dashed border-gray-200">
         <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mr-2">Quick Add Catering Service:</span>
         {QUICK_ADD_ITEMS.map((name) => (
@@ -254,7 +247,6 @@ const CateringTableEditor: React.FC<CateringTableEditorProps> = ({
         ))}
       </div>
 
-      {/* 4. Add Custom Item Row Button */}
       <div className="mt-4">
         <button 
           onClick={() => onAdd()}

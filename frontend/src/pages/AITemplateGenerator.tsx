@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  X, Sparkles, Send, Settings, CheckCircle2, Loader2, ArrowRight
-} from 'lucide-react';
+import { X, Sparkles, Settings, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { EVENT_TYPES_CHANGED_EVENT, getActiveEventTypes } from '../utils/eventTypes';
 
 const IMPORTED_TEMPLATES_KEY = 'imported_proposal_templates';
 
@@ -76,7 +75,24 @@ const AITemplateGenerator = () => {
   const [tone, setTone] = useState('Professional & Elegant');
   const [length, setLength] = useState('Comprehensive (8-10 pgs)');
   const [category, setCategory] = useState('Custom');
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(['Custom']);
   const [generatedTemplateId, setGeneratedTemplateId] = useState('');
+
+  useEffect(() => {
+    const refreshCategories = () => {
+      const names = getActiveEventTypes().map((eventType) => eventType.name);
+      const nextOptions = [...names.filter((name) => name !== 'Custom'), 'Custom'];
+      setCategoryOptions(nextOptions);
+      setCategory((current) => nextOptions.includes(current) ? current : 'Custom');
+    };
+    refreshCategories();
+    window.addEventListener(EVENT_TYPES_CHANGED_EVENT, refreshCategories);
+    window.addEventListener('storage', refreshCategories);
+    return () => {
+      window.removeEventListener(EVENT_TYPES_CHANGED_EVENT, refreshCategories);
+      window.removeEventListener('storage', refreshCategories);
+    };
+  }, []);
 
   const handleGenerate = () => {
     if (!prompt.trim()) {
@@ -103,7 +119,6 @@ const AITemplateGenerator = () => {
       
       <div className="relative z-10 w-full max-w-2xl bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col h-[600px]">
         
-        {/* HEADER */}
         <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between bg-gradient-to-r from-red-50 to-orange-50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-red-600 to-orange-400 flex items-center justify-center text-white shadow-sm">
@@ -119,7 +134,6 @@ const AITemplateGenerator = () => {
           </button>
         </div>
 
-        {/* CONTENT */}
         <div className="flex-1 overflow-y-auto p-8">
           
           {isDone ? (
@@ -174,7 +188,11 @@ const AITemplateGenerator = () => {
                       key={item.label}
                       onClick={() => {
                         setPrompt(item.prompt);
-                        setCategory(item.category);
+                        const matchingCategory = categoryOptions.find((option) =>
+                          item.category.toLowerCase().includes(option.toLowerCase()) ||
+                          option.toLowerCase().includes(item.category.replace(/s$/, '').toLowerCase()),
+                        );
+                        setCategory(matchingCategory || 'Custom');
                       }}
                       className="px-4 py-2 bg-white border border-[#ECECF1] rounded-full text-[13px] font-semibold text-gray-600 hover:border-red-300 hover:text-red-700 transition-colors"
                     >
@@ -192,10 +210,9 @@ const AITemplateGenerator = () => {
                     onChange={(event) => setCategory(event.target.value)}
                     className="w-full bg-white border border-[#ECECF1] rounded-[12px] p-3 text-[14px] font-semibold text-gray-700 focus:outline-none"
                   >
-                    <option>Custom</option>
-                    <option>Luxury Weddings</option>
-                    <option>Corporate Galas</option>
-                    <option>Hotel Partnerships</option>
+                    {categoryOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -228,7 +245,6 @@ const AITemplateGenerator = () => {
           )}
         </div>
 
-        {/* FOOTER */}
         {!isDone && !isGenerating && (
           <div className="p-6 border-t border-[#ECECF1] bg-white shrink-0 flex items-center justify-between">
             <button className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-semibold text-[14px] transition-colors">

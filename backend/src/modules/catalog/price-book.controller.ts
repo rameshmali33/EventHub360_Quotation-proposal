@@ -1,41 +1,74 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
-import { PriceBookService } from './price-book.service';
-import { CreatePriceBookDto, UpdatePriceBookDto } from './dto/create-price-book.dto';
-import { CatalogListQueryDto } from './dto/catalog-list-query.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AppRole } from '../../common/auth/roles';
+import { Roles } from '../../common/auth/roles.decorator';
+import { RolesGuard } from '../../common/auth/roles.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PriceBookService } from './price-book.service';
+import {
+  CreatePriceBookDto,
+  UpdatePriceBookDto,
+} from './dto/create-price-book.dto';
+import { CatalogListQueryDto } from './dto/catalog-list-query.dto';
 
 @ApiTags('price-books')
 @Controller('api/v1/price-books')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class PriceBookController {
   constructor(private readonly priceBookService: PriceBookService) {}
 
   @Post()
+  @Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER)
   @ApiOperation({ summary: 'Create a new price book' })
   @ApiResponse({ status: 201, description: 'Price book successfully created.' })
-  create(@Body() createDto: CreatePriceBookDto) {
-    return this.priceBookService.create(createDto);
+  create(@Body() dto: CreatePriceBookDto) {
+    return this.priceBookService.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all price books' })
+  @Roles(
+    AppRole.ADMINISTRATOR,
+    AppRole.OWNER,
+    AppRole.MANAGER,
+    AppRole.EXECUTIVE,
+  )
   findAll(@Query() query: CatalogListQueryDto) {
     return this.priceBookService.findAll(query);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a specific price book by ID' })
+  @Roles(
+    AppRole.ADMINISTRATOR,
+    AppRole.OWNER,
+    AppRole.MANAGER,
+    AppRole.EXECUTIVE,
+  )
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.priceBookService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a price book' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdatePriceBookDto) {
-    return this.priceBookService.update(id, updateDto);
+  @Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER)
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePriceBookDto,
+  ) {
+    return this.priceBookService.update(id, dto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Soft delete a price book' })
+  @Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.priceBookService.remove(id);
   }

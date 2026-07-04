@@ -1,9 +1,15 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AppRole } from '../../common/auth/roles';
+import { Roles } from '../../common/auth/roles.decorator';
+import { RolesGuard } from '../../common/auth/roles.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { LeadService } from './lead.service';
 
 @ApiTags('leads')
 @Controller('api/v1/leads')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER, AppRole.EXECUTIVE)
 export class LeadController {
   constructor(private readonly leadService: LeadService) {}
 

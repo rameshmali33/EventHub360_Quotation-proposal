@@ -10,6 +10,8 @@ import { QtnDashboardModule } from './modules/dashboard/qtn-dashboard.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LeadModule } from './modules/leads/lead.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { StatusMasterModule } from './modules/settings/status-master/status-master.module';
+import { CatalogCategoryModule } from './modules/settings/catalog-category/catalog-category.module';
 
 @Module({
   imports: [
@@ -22,9 +24,10 @@ import { AuthModule } from './modules/auth/auth.module';
     QtnDashboardModule,
     LeadModule,
     AuthModule,
+    StatusMasterModule,
+    CatalogCategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
-

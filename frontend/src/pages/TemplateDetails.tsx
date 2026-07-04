@@ -1,11 +1,6 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Users, 
-  Settings, HelpCircle, Bell, ArrowLeft, Star, Clock, User, Download, 
-  Copy, Trash2, Share2, Edit3, Eye, BarChart2, CheckCircle2, ChevronRight,
-  Type, History, Archive
-} from 'lucide-react';
+import { LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Settings, HelpCircle, Bell, ArrowLeft, Star, Clock, User, Download, Copy, Trash2, Share2, Edit3, Eye, BarChart2, CheckCircle2, ChevronRight, Type, History, Archive } from 'lucide-react';
 import CurrentUserAvatar from '../components/CurrentUserAvatar';
 
 const TemplateDetails = () => {
@@ -23,9 +18,6 @@ const TemplateDetails = () => {
   return (
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans">
       
-      {/* ========================================== */}
-      {/* LEFT SIDEBAR */}
-      {/* ========================================== */}
       <div className="w-[260px] bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-[#ECECF1] z-10 shadow-[2px_0_8px_rgba(0,0,0,0.02)] hidden lg:flex">
         <div className="p-6 pb-8 border-b border-[#ECECF1]">
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">
@@ -66,12 +58,8 @@ const TemplateDetails = () => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* MAIN CONTENT AREA */}
-      {/* ========================================== */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         
-        {/* TOP HEADER */}
         <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <button 
@@ -93,11 +81,9 @@ const TemplateDetails = () => {
           </div>
         </div>
 
-        {/* SCROLLABLE MAIN */}
         <main className="flex-1 overflow-y-auto p-10 pb-24">
           <div className="max-w-[1200px] mx-auto">
             
-            {/* PAGE HEADER */}
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <div className="flex items-center gap-3 mb-3">
@@ -134,13 +120,10 @@ const TemplateDetails = () => {
               </div>
             </div>
 
-            {/* TWO COLUMNS LAYOUT */}
             <div className="flex flex-col xl:flex-row gap-8">
               
-              {/* LEFT COLUMN: PREVIEW & SECTIONS */}
               <div className="flex-1 space-y-8">
                 
-                {/* PREVIEW CARD */}
                 <div className="bg-white rounded-[32px] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <div className="bg-[#F8F9FC] rounded-[24px] aspect-[4/3] flex items-center justify-center overflow-hidden relative group">
                     <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80" alt="Cover Preview" className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700" />
@@ -150,7 +133,6 @@ const TemplateDetails = () => {
                   </div>
                 </div>
 
-                {/* SECTIONS INCLUDED */}
                 <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <h3 className="text-[18px] font-bold text-gray-900 mb-6">Sections Included (8 Pages)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,10 +147,8 @@ const TemplateDetails = () => {
 
               </div>
 
-              {/* RIGHT SIDEBAR: METADATA & ACTIONS */}
               <div className="xl:w-[360px] flex flex-col gap-8 shrink-0">
                 
-                {/* METADATA CARD */}
                 <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <h3 className="text-[14px] font-bold text-gray-400 uppercase tracking-widest mb-6">Template Info</h3>
                   
@@ -210,7 +190,6 @@ const TemplateDetails = () => {
                   </div>
                 </div>
 
-                {/* ACTIONS CARD */}
                 <div className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <h3 className="text-[14px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-2">Quick Actions</h3>
                   <div className="space-y-2">

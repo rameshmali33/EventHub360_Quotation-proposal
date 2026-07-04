@@ -18,9 +18,7 @@ describe('PricingService', () => {
 
   it('1. should calculate normal calculation correctly', () => {
     const result = service.calculateQuotePricing({
-      lines: [
-        { qty: 2, rate: 100, cost: 50, taxPercent: 10 },
-      ],
+      lines: [{ qty: 2, rate: 100, cost: 50, taxPercent: 10 }],
     });
 
     // subtotal = 200
@@ -41,7 +39,13 @@ describe('PricingService', () => {
   it('2. should calculate line discount correctly', () => {
     const result = service.calculateQuotePricing({
       lines: [
-        { qty: 1, rate: 1000, cost: 500, taxPercent: 5, lineDiscountPercent: 10 },
+        {
+          qty: 1,
+          rate: 1000,
+          cost: 500,
+          taxPercent: 5,
+          lineDiscountPercent: 10,
+        },
       ],
     });
 
@@ -88,9 +92,7 @@ describe('PricingService', () => {
 
   it('4. should handle zero subtotal gracefully', () => {
     const result = service.calculateQuotePricing({
-      lines: [
-        { qty: 0, rate: 100, cost: 50, taxPercent: 10 },
-      ],
+      lines: [{ qty: 0, rate: 100, cost: 50, taxPercent: 10 }],
     });
 
     expect(result.subtotal).toBe(0);
@@ -100,9 +102,7 @@ describe('PricingService', () => {
 
   it('5. should handle low margin or negative margin case', () => {
     const result = service.calculateQuotePricing({
-      lines: [
-        { qty: 1, rate: 100, cost: 120, taxPercent: 0 },
-      ],
+      lines: [{ qty: 1, rate: 100, cost: 120, taxPercent: 0 }],
     });
 
     // subtotal = 100

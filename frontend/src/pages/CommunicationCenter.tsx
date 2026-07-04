@@ -1,10 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Users, 
-  Settings, HelpCircle, Bell, History as HistoryIcon, Eye, Mail, MessageCircle, 
-  MessageSquare, X, Paperclip, Bold, Clock, Send, Plus, CheckCircle2, FileType2, Download
-} from 'lucide-react';
+import { LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Settings, HelpCircle, Bell, History as HistoryIcon, Eye, Mail, MessageCircle, MessageSquare, X, Paperclip, Bold, Clock, Send, Plus, CheckCircle2, FileType2, Download } from 'lucide-react';
 import CurrentUserAvatar from '../components/CurrentUserAvatar';
 
 const CommunicationCenter = () => {
@@ -25,11 +21,7 @@ const CommunicationCenter = () => {
   return (
     <div className="flex min-h-screen bg-[#F8F9FC] font-sans">
       
-      {/* ========================================== */}
-      {/* LEFT SIDEBAR */}
-      {/* ========================================== */}
       <div className="w-[260px] bg-white h-screen fixed left-0 top-0 flex flex-col border-r border-[#ECECF1] z-10 shadow-[2px_0_8px_rgba(0,0,0,0.02)] hidden lg:flex">
-        {/* Logo Section */}
         <div className="p-6 pb-8 border-b border-[#ECECF1]">
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">
             <span className="text-red-700">Event</span>Hub360
@@ -37,7 +29,6 @@ const CommunicationCenter = () => {
           <p className="text-[10px] text-gray-500 font-bold mt-1 uppercase tracking-widest">Enterprise Concierge</p>
         </div>
 
-        {/* Navigation */}
         <div className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {sidebarNavItems.map((item: any, index: any) => {
             const Icon = item.icon;
@@ -63,7 +54,6 @@ const CommunicationCenter = () => {
           })}
         </div>
 
-        {/* Bottom Section */}
         <div className="p-6 pt-4 border-t border-[#ECECF1] space-y-4">
           <div className="space-y-1">
             <button className="w-full flex items-center h-10 px-4 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors font-medium">
@@ -78,12 +68,8 @@ const CommunicationCenter = () => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* MAIN CONTENT AREA */}
-      {/* ========================================== */}
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         
-        {/* TOP HEADER */}
         <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between shrink-0">
           <div className="w-[200px]">
             <h2 className="text-[20px] font-bold text-red-700 tracking-tight leading-tight">
@@ -91,7 +77,6 @@ const CommunicationCenter = () => {
             </h2>
           </div>
 
-          {/* Center Tabs */}
           <div className="flex-1 flex items-center justify-center gap-8 h-full">
             <div className="flex items-center h-full gap-6">
               {['All Quotes', 'Drafts', 'Pending Approval'].map((tab: any, idx: any) => (
@@ -110,7 +95,6 @@ const CommunicationCenter = () => {
             </div>
           </div>
 
-          {/* Right Section */}
           <div className="flex items-center gap-5">
             <button className="relative text-gray-500 hover:text-gray-700 transition-colors">
               <Bell className="w-[22px] h-[22px]" />
@@ -125,11 +109,9 @@ const CommunicationCenter = () => {
           </div>
         </div>
 
-        {/* SCROLLABLE MAIN */}
         <main className="flex-1 overflow-y-auto p-10 pb-24">
           <div className="max-w-[1200px] mx-auto">
             
-            {/* PAGE HEADER */}
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <p className="text-[11px] font-bold text-red-700 uppercase tracking-[0.15em] mb-2">Quotation #QT-2024-089</p>
@@ -146,16 +128,11 @@ const CommunicationCenter = () => {
               </button>
             </div>
 
-            {/* TWO COLUMNS LAYOUT */}
             <div className="flex flex-col xl:flex-row gap-8">
               
-              {/* ========================================== */}
-              {/* LEFT COLUMN: MAIN COMMUNICATION CARD */}
-              {/* ========================================== */}
               <div className="flex-1">
                 <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1] flex flex-col">
                   
-                  {/* CHANNEL TABS */}
                   <div className="flex items-center gap-8 border-b border-[#ECECF1] mb-8">
                     {[
                       { id: 'Email', icon: Mail },
@@ -178,10 +155,8 @@ const CommunicationCenter = () => {
                     ))}
                   </div>
 
-                  {/* EMAIL FORM */}
                   <div className="space-y-6 flex-1 flex flex-col">
                     
-                    {/* TO FIELD */}
                     <div className="flex items-center gap-4">
                       <span className="w-16 text-[15px] font-semibold text-gray-900">To:</span>
                       <div className="flex-1 bg-[#F8F9FC] border border-[#ECECF1] rounded-[16px] p-2 flex items-center">
@@ -194,7 +169,6 @@ const CommunicationCenter = () => {
                       </div>
                     </div>
 
-                    {/* SUBJECT FIELD */}
                     <div className="flex items-center gap-4">
                       <span className="w-16 text-[15px] font-semibold text-gray-900">Subject:</span>
                       <div className="flex-1">
@@ -206,14 +180,12 @@ const CommunicationCenter = () => {
                       </div>
                     </div>
 
-                    {/* MESSAGE EDITOR */}
                     <div className="flex-1 bg-[#F8F5FF] rounded-[20px] p-6 border border-[#ECECF1] flex flex-col gap-6 relative min-h-[300px]">
                       <textarea 
                         className="w-full flex-1 bg-transparent border-none resize-none text-[15px] text-gray-800 leading-relaxed focus:outline-none"
                         defaultValue={`Dear Marcus,\n\nIt was a pleasure discussing the Summer Corporate Gala with your team earlier this week. Following our conversation, I am delighted to present the revised quotation for the EventHub360 full-service package.\n\nWe have incorporated the additional AV requirements and the premium catering options we discussed. You will find the detailed breakdown in the attached PDF proposal.`}
                       ></textarea>
                       
-                      {/* ATTACHMENT CARD */}
                       <div className="bg-white border border-[#ECECF1] rounded-[18px] p-4 flex items-center justify-between shadow-sm self-start w-full md:w-auto min-w-[320px]">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-[14px] bg-red-50 flex items-center justify-center text-red-600">
@@ -232,7 +204,6 @@ const CommunicationCenter = () => {
 
                   </div>
 
-                  {/* MESSAGE TOOLBAR */}
                   <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-[#ECECF1]">
                     <div className="flex items-center gap-3">
                       <button className="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
@@ -258,12 +229,8 @@ const CommunicationCenter = () => {
                 </div>
               </div>
 
-              {/* ========================================== */}
-              {/* RIGHT SIDEBAR: TEMPLATES & READINESS */}
-              {/* ========================================== */}
               <div className="xl:w-[340px] flex flex-col gap-6 shrink-0">
                 
-                {/* TEMPLATE LIBRARY CARD */}
                 <div className="bg-white rounded-[28px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-[18px] font-bold text-gray-900">Templates</h3>
@@ -303,7 +270,6 @@ const CommunicationCenter = () => {
                   </div>
                 </div>
 
-                {/* SEND READINESS CARD */}
                 <div className="bg-[#B2262E] rounded-[28px] p-8 text-white shadow-[0_8px_20px_rgba(178,38,46,0.2)]">
                   <h3 className="text-[12px] font-bold text-red-200 uppercase tracking-widest mb-6">Send Readiness</h3>
                   

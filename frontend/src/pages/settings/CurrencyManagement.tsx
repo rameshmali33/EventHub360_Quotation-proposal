@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, IndianRupee, Plus, Edit2, Trash2, 
-  TrendingUp, TrendingDown, Clock, Save, X
-} from 'lucide-react';
+import { ArrowLeft, IndianRupee, Plus, Edit2, Trash2, TrendingUp, TrendingDown, Clock, X } from 'lucide-react';
 
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
   <button 
@@ -54,7 +51,6 @@ const CurrencyManagement = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Left Column: Global Config */}
               <div className="space-y-6">
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                   <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[#ECECF1]">
@@ -94,7 +90,6 @@ const CurrencyManagement = () => {
                 </div>
               </div>
 
-              {/* Right Column: Currency Table */}
               <div className="lg:col-span-2">
                 <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] overflow-hidden">
                   <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
@@ -168,7 +163,6 @@ const CurrencyManagement = () => {
           </div>
         </main>
 
-        {/* Add Currency Modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-[24px] p-8 w-full max-w-md shadow-xl border border-[#ECECF1]">

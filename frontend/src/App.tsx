@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ErrorBoundary from './ErrorBoundary';
 import QuotationDashboard from './pages/QuotationDashboard';
@@ -10,6 +10,7 @@ import GlobalPriceBook from './pages/GlobalPriceBook';
 import Templates from './pages/Templates';
 import Approvals from './pages/Approvals';
 import ClientPortal from './pages/ClientPortal';
+import MarginAnalysis from './pages/MarginAnalysis';
 import VersionComparison from './pages/VersionComparison';
 import QuoteAcceptedDashboard from './pages/QuoteAcceptedDashboard';
 import CommunicationCenter from './pages/CommunicationCenter';
@@ -57,11 +58,15 @@ import NotificationPreferences from './pages/settings/NotificationPreferences';
 import UserPermissions from './pages/settings/UserPermissions';
 import SalesExecutivesMaster from './pages/settings/SalesExecutivesMaster';
 import EventTypesMaster from './pages/settings/EventTypesMaster';
+import QuotationStatusMaster from './pages/settings/QuotationStatusMaster';
+import PriceBookMaster from './pages/settings/PriceBookMaster';
+import CatalogCategoryMaster from './pages/settings/CatalogCategoryMaster';
 import SettingsAuditLogs from './pages/settings/SettingsAuditLogs';
 import SupportCenter from './pages/SupportCenter';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
+import { ForgotPassword, ResetPassword } from './pages/PasswordRecovery';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -73,6 +78,8 @@ function App() {
           <Routes>
           <Route path="/login" element={<AuthPage mode="signin" />} />
           <Route path="/signup" element={<AuthPage mode="signup" />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<ProtectedRoute />}>
           <Route path="/" element={<QuotationDashboard />} />
           <Route path="/quotations" element={<QuotationListPage />} />
@@ -81,7 +88,6 @@ function App() {
           <Route path="/quotations/forecast" element={<RevenueForecastCenter />} />
           <Route path="/quotations/master" element={<QuotationsMasterList />} />
           
-          {/* Drafts Module Routes */}
           <Route path="/quotations/drafts" element={<DraftManagementCenter />} />
           <Route path="/quotations/drafts/continue" element={<ContinueEditingWizard />} />
           <Route path="/quotations/drafts/details" element={<DraftDetails />} />
@@ -102,7 +108,6 @@ function App() {
           <Route path="/activity-timeline" element={<ActivityTimeline />} />
           <Route path="/profile" element={<UserProfile />} />
           
-          {/* Settings Routes */}
           <Route path="/settings" element={<SystemSettings />} />
           <Route path="/settings/automated-numbering" element={<AutomatedNumbering />} />
           <Route path="/settings/approval-rule-wizard" element={<ApprovalRuleWizard />} />
@@ -114,6 +119,9 @@ function App() {
           <Route path="/settings/permissions" element={<UserPermissions />} />
           <Route path="/settings/sales-executives" element={<SalesExecutivesMaster />} />
           <Route path="/settings/event-types" element={<EventTypesMaster />} />
+          <Route path="/settings/quotation-statuses" element={<QuotationStatusMaster />} />
+          <Route path="/settings/price-books" element={<PriceBookMaster />} />
+          <Route path="/settings/catalog-categories" element={<CatalogCategoryMaster />} />
           <Route path="/settings/audit-logs" element={<SettingsAuditLogs />} />
           
           <Route path="/support" element={<SupportCenter />} />
@@ -124,7 +132,6 @@ function App() {
           <Route path="/quotations/accepted" element={<QuoteAcceptedDashboard />} />
           <Route path="/quotations/communication" element={<CommunicationCenter />} />
           
-          {/* Templates Module Routes */}
           <Route path="/templates/new" element={<CreateTemplateWizard />} />
           <Route path="/templates/custom" element={<BlankTemplateBuilder />} />
           <Route path="/templates/:id/edit" element={<FullTemplateBuilder />} />
@@ -145,11 +152,11 @@ function App() {
           <Route path="/templates/analytics" element={<TemplateAnalytics />} />
           <Route path="/proposals" element={<ProposalStudio />} />
           <Route path="/price-book" element={<GlobalPriceBook />} />
+          <Route path="/margin-analysis" element={<MarginAnalysis />} />
           
-          {/* Added placeholders for requested missing pages */}
           <Route path="/templates" element={<Templates />} />
           <Route path="/approvals" element={<Approvals />} />
-          <Route path="/client-portal" element={<Navigate to="/" replace />} />
+          <Route path="/client-portal" element={<ClientPortal />} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

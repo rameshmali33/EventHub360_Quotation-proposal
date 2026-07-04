@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Search, Filter, Calendar, Users, Briefcase, FileText
-} from 'lucide-react';
+import { ArrowLeft, Search, Filter, Calendar, Users, Briefcase, FileText } from 'lucide-react';
 
 const DraftSearchFilter = () => {
   const navigate = useNavigate();
@@ -51,7 +49,6 @@ const DraftSearchFilter = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   
-                  {/* Status / Progress Filter */}
                   <div className="space-y-3">
                     <label className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
                       <FileText className="w-3.5 h-3.5" /> Progress Stage
@@ -64,7 +61,6 @@ const DraftSearchFilter = () => {
                     </select>
                   </div>
 
-                  {/* Owner Filter */}
                   <div className="space-y-3">
                     <label className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
                       <Users className="w-3.5 h-3.5" /> Assigned Owner
@@ -77,7 +73,6 @@ const DraftSearchFilter = () => {
                     </select>
                   </div>
 
-                  {/* Client Filter */}
                   <div className="space-y-3">
                     <label className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
                       <Briefcase className="w-3.5 h-3.5" /> Client Account
@@ -90,7 +85,6 @@ const DraftSearchFilter = () => {
                     </select>
                   </div>
 
-                  {/* Date Range Filter */}
                   <div className="space-y-3">
                     <label className="text-[12px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5" /> Last Modified Date

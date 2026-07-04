@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import { qtnDashboardService } from '../services/qtnDashboardService';
-import { 
-  TrendingUp, BarChart3, PieChart, Activity, Target, ArrowRight, Loader
-} from 'lucide-react';
+import { PieChart, Activity, Target, Loader } from 'lucide-react';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 };
 
 const RevenueForecastCenter = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [funnel, setFunnel] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +68,6 @@ const RevenueForecastCenter = () => {
               </div>
             ) : (
               <>
-                {/* Forecast Summary & Projections */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {projections.map((proj: any, idx: any) => (
                     <div key={idx} className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] relative overflow-hidden">
@@ -91,10 +87,8 @@ const RevenueForecastCenter = () => {
                   ))}
                 </div>
 
-                {/* Main Charts Area */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                   
-                  {/* Opportunity Pipeline */}
                   <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-[18px] font-bold text-gray-900">Opportunity Pipeline</h3>
@@ -118,7 +112,6 @@ const RevenueForecastCenter = () => {
                     </div>
                   </div>
 
-                  {/* Conversion Impact Analysis */}
                   <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-[18px] font-bold text-gray-900">Conversion Impact Analysis</h3>

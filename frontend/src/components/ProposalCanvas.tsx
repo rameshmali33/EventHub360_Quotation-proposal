@@ -12,69 +12,135 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(value || 0));
 };
 
-const ProposalLineItems = ({ proposal }: { proposal?: any | null }) => {
-  const quotation = proposal?.quotation;
-  const lines = quotation?.lines || [];
+const formatDate = (value?: string | null) => value
+  ? new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+  : 'Not specified';
 
+const formatItemType = (value: string) => String(value || 'Service')
+  .replace(/_/g, ' ')
+  .toLowerCase()
+  .replace(/\b\w/g, (character) => character.toUpperCase());
+
+const FormalQuotationPage = ({ proposal }: { proposal?: any | null }) => {
+  const quotation = proposal?.quotation;
   if (!quotation) return null;
 
+  const lines = Array.isArray(quotation.lines) ? quotation.lines : [];
+  const subtotal = Number(quotation.subtotal || 0);
+  const taxTotal = Number(quotation.taxTotal || 0);
+  const total = Number(quotation.total || subtotal + taxTotal);
+  const taxRate = subtotal > 0 ? (taxTotal / subtotal) * 100 : 0;
+
   return (
-    <div className="px-16 pb-16">
-      <div className="border-t border-gray-200 pt-10">
-        <div className="flex items-end justify-between mb-8">
+    <article className="min-h-[1120px] bg-white px-14 py-12 text-gray-900">
+      <header className="flex items-start justify-between border-b-2 border-gray-900 pb-7">
+        <div>
+          <h1 className="text-[26px] font-black tracking-tight"><span className="text-red-700">Event</span>Hub360</h1>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Enterprise Event Concierge</p>
+          <p className="mt-4 max-w-[340px] text-[12px] font-medium leading-relaxed text-gray-500">
+            Professional event quotation prepared from the approved EventHub360 scope.
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-[34px] font-black uppercase tracking-[0.12em] text-gray-950">Quotation</p>
+          <p className="mt-2 text-[14px] font-black text-red-700">#{quotation.quoteRef}</p>
+          <span className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700">
+            {quotation.status || 'Approved'}
+          </span>
+        </div>
+      </header>
+
+      <section className="grid grid-cols-2 gap-10 border-b border-gray-200 py-7">
+        <div>
+          <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">Quotation For</p>
+          <h2 className="text-[20px] font-black text-gray-950">{quotation.clientName || 'Client'}</h2>
+          <p className="mt-1 text-[12px] font-semibold text-gray-500">Client Account</p>
+        </div>
+        <dl className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-2 text-[12px]">
+          <dt className="font-bold text-gray-500">Quotation Date</dt>
+          <dd className="text-right font-black text-gray-900">{formatDate(quotation.createdAt || proposal?.createdAt)}</dd>
+          <dt className="font-bold text-gray-500">Valid Until</dt>
+          <dd className="text-right font-black text-gray-900">{formatDate(quotation.expiresAt)}</dd>
+          <dt className="font-bold text-gray-500">Currency</dt>
+          <dd className="text-right font-black text-gray-900">{quotation.currency || 'INR'}</dd>
+          <dt className="font-bold text-gray-500">Proposal Ref</dt>
+          <dd className="text-right font-black text-gray-900">PROP-{String(proposal?.id || 0).padStart(5, '0')}</dd>
+        </dl>
+      </section>
+
+      <section className="py-8">
+        <div className="mb-4 flex items-end justify-between">
           <div>
-            <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#B3262E] mb-2">Commercial Scope</p>
-            <h3 className="text-[30px] font-black text-gray-950">Selected Items</h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-700">Commercial Schedule</p>
+            <h2 className="mt-1 text-[22px] font-black text-gray-950">Scope and Pricing</h2>
           </div>
-          <div className="text-right">
-            <p className="text-[12px] font-bold uppercase tracking-widest text-gray-400">Total</p>
-            <p className="text-[28px] font-black text-[#B3262E]">{formatCurrency(quotation.total)}</p>
-          </div>
+          <p className="text-[11px] font-bold text-gray-500">{lines.length} item{lines.length === 1 ? '' : 's'}</p>
         </div>
 
-        {lines.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-sm font-semibold text-gray-500">
-            No quotation line items were found for this proposal.
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-2xl border border-gray-200">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-5 py-4 text-[11px] font-black uppercase tracking-widest text-gray-500">Description</th>
-                  <th className="px-5 py-4 text-[11px] font-black uppercase tracking-widest text-gray-500 text-center">Qty</th>
-                  <th className="px-5 py-4 text-[11px] font-black uppercase tracking-widest text-gray-500 text-right">Rate</th>
-                  <th className="px-5 py-4 text-[11px] font-black uppercase tracking-widest text-gray-500 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
-                {lines.map((line: any) => (
-                  <tr key={line.lineId}>
-                    <td className="px-5 py-4">
-                      <p className="text-[14px] font-bold text-gray-950">{line.description}</p>
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{line.itemType}</p>
+        <div className="overflow-hidden border border-gray-300">
+          <table className="w-full table-fixed border-collapse text-left">
+            <thead className="bg-gray-900 text-white">
+              <tr>
+                <th className="w-[52px] px-3 py-3 text-center text-[10px] font-black uppercase tracking-wider">No.</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider">Description</th>
+                <th className="w-[70px] px-3 py-3 text-center text-[10px] font-black uppercase tracking-wider">Qty</th>
+                <th className="w-[125px] px-3 py-3 text-right text-[10px] font-black uppercase tracking-wider">Rate</th>
+                <th className="w-[135px] px-4 py-3 text-right text-[10px] font-black uppercase tracking-wider">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.length === 0 ? (
+                <tr><td colSpan={5} className="px-5 py-10 text-center text-[13px] font-semibold text-gray-500">No active quotation line items were returned.</td></tr>
+              ) : lines.map((line: any, index: number) => {
+                const qty = Number(line.qty || 0);
+                const rate = Number(line.rate || 0);
+                const amount = Number(line.amount || 0) || qty * rate;
+                return (
+                  <tr key={line.lineId || `${line.description}-${index}`} className="border-b border-gray-200 last:border-b-0">
+                    <td className="px-3 py-4 text-center text-[12px] font-bold text-gray-500">{index + 1}</td>
+                    <td className="px-4 py-4">
+                      <p className="break-words text-[13px] font-black leading-snug text-gray-950">{line.description || 'Quotation item'}</p>
+                      <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-gray-400">{formatItemType(line.itemType)}</p>
                     </td>
-                    <td className="px-5 py-4 text-center text-[14px] font-semibold text-gray-700">{line.qty}</td>
-                    <td className="px-5 py-4 text-right text-[14px] font-semibold text-gray-700">{formatCurrency(line.rate)}</td>
-                    <td className="px-5 py-4 text-right text-[14px] font-black text-gray-950">{formatCurrency(line.amount)}</td>
+                    <td className="px-3 py-4 text-center text-[12px] font-bold text-gray-700">{qty}</td>
+                    <td className="px-3 py-4 text-right text-[12px] font-semibold text-gray-700">{formatCurrency(rate)}</td>
+                    <td className="px-4 py-4 text-right text-[12px] font-black text-gray-950">{formatCurrency(amount)}</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <div className="mt-6 ml-auto w-full max-w-[360px] space-y-3 rounded-2xl bg-gray-50 p-6 border border-gray-100">
-          <div className="flex justify-between text-[14px] font-semibold text-gray-600"><span>Subtotal</span><span>{formatCurrency(quotation.subtotal)}</span></div>
-          <div className="flex justify-between text-[14px] font-semibold text-gray-600"><span>Taxes</span><span>{formatCurrency(quotation.taxTotal)}</span></div>
-          <div className="flex justify-between border-t border-gray-200 pt-4 text-[18px] font-black text-gray-950"><span>Total Quote Value</span><span>{formatCurrency(quotation.total)}</span></div>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className="grid grid-cols-[1fr_330px] gap-10 border-t border-gray-200 pt-7">
+        <div>
+          <h3 className="text-[12px] font-black uppercase tracking-[0.16em] text-gray-900">Commercial Terms</h3>
+          <ul className="mt-4 space-y-2 text-[11px] font-medium leading-relaxed text-gray-600">
+            <li>1. This quotation remains valid until {formatDate(quotation.expiresAt)}.</li>
+            <li>2. Services are confirmed after written acceptance and the agreed advance payment.</li>
+            <li>3. Scope changes requested after acceptance may require a revised quotation.</li>
+            <li>4. Applicable taxes are shown separately and included in the grand total.</li>
+          </ul>
+        </div>
+        <div className="border border-gray-300">
+          <div className="flex justify-between border-b border-gray-200 px-5 py-3 text-[12px] font-bold text-gray-600"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
+          <div className="flex justify-between border-b border-gray-200 px-5 py-3 text-[12px] font-bold text-gray-600"><span>GST ({taxRate.toFixed(2)}%)</span><span>{formatCurrency(taxTotal)}</span></div>
+          <div className="flex justify-between bg-red-700 px-5 py-4 text-white"><span className="text-[13px] font-black uppercase tracking-wider">Grand Total</span><span className="text-[19px] font-black">{formatCurrency(total)}</span></div>
+        </div>
+      </section>
+
+      <section className="mt-14 grid grid-cols-2 gap-16">
+        <div className="border-t border-gray-400 pt-3"><p className="text-[11px] font-black uppercase tracking-wider text-gray-700">Authorized Signatory</p><p className="mt-1 text-[10px] font-medium text-gray-400">For EventHub360</p></div>
+        <div className="border-t border-gray-400 pt-3"><p className="text-[11px] font-black uppercase tracking-wider text-gray-700">Client Acceptance</p><p className="mt-1 text-[10px] font-medium text-gray-400">Name, signature, and date</p></div>
+      </section>
+
+      <footer className="mt-12 flex items-center justify-between border-t border-gray-200 pt-4 text-[9px] font-bold uppercase tracking-widest text-gray-400">
+        <span>System-generated quotation</span><span>#{quotation.quoteRef}</span>
+      </footer>
+    </article>
   );
 };
-
-
 const getMoodboardItems = (lines: any[]) => {
   const palette = [
     { name: 'Signature Red', color: '#B3262E' },
@@ -172,10 +238,12 @@ const ProposalCanvas: React.FC<ProposalCanvasProps> = ({ proposal, activePageId 
             <div className="p-16 flex gap-16">
               <WelcomeSection proposal={proposal} />
             </div>
-            <ProposalLineItems proposal={proposal} />
           </>
         )}
 
+        {activePageId === 'quotation' && (
+          <FormalQuotationPage proposal={proposal} />
+        )}
         {activePageId === 'moodboard' && (
           <MoodboardPage proposal={proposal} />
         )}

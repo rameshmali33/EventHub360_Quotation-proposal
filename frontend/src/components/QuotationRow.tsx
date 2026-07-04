@@ -1,10 +1,10 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 import CurrentUserAvatar from './CurrentUserAvatar';
 import { Edit3, MoreVertical, Trash2 } from 'lucide-react';
 
-const QuotationRow = ({ quotation, openMenuId, setOpenMenuId, onDelete  }: any) => {
+const QuotationRow = ({ quotation, openMenuId, setOpenMenuId, onDelete, canEdit }: any) => {
   const navigate = useNavigate();
   const isMenuOpen = openMenuId === quotation.quotation_id;
 
@@ -71,8 +71,9 @@ const QuotationRow = ({ quotation, openMenuId, setOpenMenuId, onDelete  }: any) 
                 className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-[13px] font-bold text-gray-700 hover:bg-gray-50"
               >
                 <Edit3 className="h-4 w-4" />
-                Edit Quotation
+                {canEdit ? 'Edit Quotation' : 'View Quotation'}
               </button>
+              {canEdit && (
               <button
                 type="button"
                 onClick={(event) => {
@@ -85,6 +86,7 @@ const QuotationRow = ({ quotation, openMenuId, setOpenMenuId, onDelete  }: any) 
                 <Trash2 className="h-4 w-4" />
                 Delete Quotation
               </button>
+              )}
             </div>
           )}
         </div>

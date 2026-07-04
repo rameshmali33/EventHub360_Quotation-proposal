@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { canAccessPath, roleHome } from '../utils/permissions';
 
 const ProtectedRoute: React.FC = () => {
   const { user, loading } = useAuth();
@@ -17,7 +18,9 @@ const ProtectedRoute: React.FC = () => {
     );
   }
 
-  return user ? <Outlet /> : <Navigate to="/login" replace state={{ from: location }} />;
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (!canAccessPath(user.role, location.pathname)) return <Navigate to={roleHome(user.role)} replace />;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,10 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, GitCommit, Copy, RotateCcw, FileText, Check, ChevronRight
-} from 'lucide-react';
+import { ArrowLeft, Copy, RotateCcw, FileText, ChevronRight } from 'lucide-react';
 
 const DraftVersionHistory = () => {
   const navigate = useNavigate();

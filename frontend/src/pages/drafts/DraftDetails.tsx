@@ -1,11 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, FileEdit, Users, Calendar, Clock, MessageSquare, 
-  Play, Download, Share2, Activity, GitCommit, Search, IndianRupee
-} from 'lucide-react';
+import { ArrowLeft, FileEdit, Users, Calendar, Clock, MessageSquare, Play, Download, Share2, Activity, GitCommit, IndianRupee } from 'lucide-react';
 
 const DraftDetails = () => {
   const navigate = useNavigate();
@@ -19,7 +16,6 @@ const DraftDetails = () => {
         <main className="flex-1 overflow-y-auto p-8 pb-32">
           <div className="max-w-[1200px] mx-auto space-y-6">
             
-            {/* Header Area */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <button 
@@ -60,10 +56,8 @@ const DraftDetails = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Left Column: Metadata & Details */}
               <div className="lg:col-span-2 space-y-6">
                 
-                {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="bg-white p-5 rounded-[20px] shadow-sm border border-[#ECECF1]">
                     <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
@@ -95,7 +89,6 @@ const DraftDetails = () => {
                   </div>
                 </div>
 
-                {/* Draft Overview Card */}
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                   <h2 className="text-[18px] font-bold text-gray-900 mb-6">Draft Overview</h2>
                   
@@ -142,7 +135,6 @@ const DraftDetails = () => {
                   </div>
                 </div>
 
-                {/* Collaboration & Comments */}
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-[18px] font-bold text-gray-900 flex items-center gap-2">
@@ -181,10 +173,8 @@ const DraftDetails = () => {
 
               </div>
 
-              {/* Right Column: Timeline & Validation */}
               <div className="space-y-6">
                 
-                {/* Readiness Check */}
                 <div 
                   className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] cursor-pointer hover:border-red-200 transition-colors"
                   onClick={() => navigate('/quotations/drafts/approval-readiness')}
@@ -208,7 +198,6 @@ const DraftDetails = () => {
                   </div>
                 </div>
 
-                {/* Activity Timeline */}
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-[16px] font-bold text-gray-900 flex items-center gap-2">

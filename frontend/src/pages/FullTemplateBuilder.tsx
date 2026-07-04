@@ -1,9 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  ArrowLeft, Eye, Save, Settings, Layout, Image, 
-  Type, Palette, Plus, ChevronRight, Layers, FileText, Move, CheckCircle
-} from 'lucide-react';
+import { ArrowLeft, Eye, Save, Layout, Image, Type, Plus, Layers, FileText, Move, CheckCircle } from 'lucide-react';
 
 const IMPORTED_TEMPLATES_KEY = 'imported_proposal_templates';
 
@@ -36,9 +33,6 @@ const FullTemplateBuilder = ({ isBlank = false  }: any) => {
   return (
     <div className="flex h-screen bg-[#F8F9FC] font-sans overflow-hidden">
       
-      {/* ========================================== */}
-      {/* LEFT SIDEBAR: BUILDER TOOLS */}
-      {/* ========================================== */}
       <div className="w-[300px] bg-white h-screen flex flex-col border-r border-[#ECECF1] z-10 shadow-sm shrink-0">
         
         <div className="p-4 border-b border-[#ECECF1] flex items-center gap-3">
@@ -117,12 +111,8 @@ const FullTemplateBuilder = ({ isBlank = false  }: any) => {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* MAIN CANVAS AREA */}
-      {/* ========================================== */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden bg-gray-200 relative">
         
-        {/* BUILDER HEADER */}
         <div className="absolute top-4 left-4 right-4 bg-white/90 backdrop-blur-md border border-[#ECECF1] rounded-[16px] h-14 px-4 flex items-center justify-between z-20 shadow-sm">
           <div className="flex items-center gap-4">
             <span className="text-[13px] font-bold text-gray-700 flex items-center gap-2">
@@ -145,7 +135,6 @@ const FullTemplateBuilder = ({ isBlank = false  }: any) => {
           </div>
         </div>
 
-        {/* CANVAS */}
         <main className="flex-1 overflow-y-auto p-8 pt-24 pb-24 flex justify-center">
           <div className="w-[850px] min-h-[1100px] bg-white shadow-xl flex flex-col relative transition-all duration-300 group ring-1 ring-gray-200">
             {isBlank ? (
@@ -158,7 +147,6 @@ const FullTemplateBuilder = ({ isBlank = false  }: any) => {
               </div>
             ) : (
               <div className="flex-1 p-16 flex flex-col relative">
-                {/* Visual Editor Overlay for existing template */}
                 <div className="absolute inset-0 border-2 border-transparent group-hover:border-red-400 transition-colors pointer-events-none z-10"></div>
 
                 {isGeneratedTemplate ? (
@@ -240,9 +228,6 @@ const FullTemplateBuilder = ({ isBlank = false  }: any) => {
         </main>
       </div>
 
-      {/* ========================================== */}
-      {/* RIGHT SIDEBAR: PROPERTIES */}
-      {/* ========================================== */}
       <div className="w-[280px] bg-white border-l border-[#ECECF1] shadow-sm flex flex-col z-10 shrink-0 hidden xl:flex">
         <div className="h-14 border-b border-[#ECECF1] px-4 flex items-center">
           <h3 className="text-[13px] font-bold text-gray-900 uppercase tracking-widest">Properties</h3>

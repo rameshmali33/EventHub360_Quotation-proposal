@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Save, Send, CheckCircle2, ChevronRight, 
-  MapPin, Calendar, Users, IndianRupee, FileText, ChevronLeft
-} from 'lucide-react';
+import { ArrowLeft, Save, Send, CheckCircle2, ChevronRight, MapPin, Calendar, Users, IndianRupee, FileText, ChevronLeft } from 'lucide-react';
 
 const ContinueEditingWizard = () => {
   const navigate = useNavigate();
@@ -38,7 +35,6 @@ const ContinueEditingWizard = () => {
         <main className="flex-1 overflow-y-auto p-8 pb-32">
           <div className="max-w-[1200px] mx-auto space-y-6">
             
-            {/* Header Area */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <button 
@@ -63,7 +59,6 @@ const ContinueEditingWizard = () => {
               </div>
             </div>
 
-            {/* Wizard Navigation */}
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] mb-6 flex justify-between items-center relative overflow-x-auto">
               <div className="absolute left-10 right-10 top-1/2 h-0.5 bg-gray-100 -z-0"></div>
               {steps.map((step: any) => (
@@ -82,7 +77,6 @@ const ContinueEditingWizard = () => {
               ))}
             </div>
 
-            {/* Content Area */}
             <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] min-h-[500px] flex flex-col">
               
               <div className="p-8 flex-1">
@@ -120,7 +114,6 @@ const ContinueEditingWizard = () => {
                 )}
               </div>
 
-              {/* Bottom Nav */}
               <div className="p-6 border-t border-[#ECECF1] bg-[#F8F9FC] rounded-b-[24px] flex items-center justify-between">
                 <button 
                   onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}

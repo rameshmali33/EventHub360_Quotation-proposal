@@ -1,4 +1,4 @@
-import React from 'react';
+
 import FullTemplateBuilder from './FullTemplateBuilder';
 
 const BlankTemplateBuilder = () => {

@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Shield, Users, GitBranch, Save, ChevronRight, 
-  CheckCircle2, Plus, Trash2, Copy, AlertTriangle, X
-} from 'lucide-react';
+import { ArrowLeft, Shield, Users, GitBranch, Save, ChevronRight, CheckCircle2, Plus, Trash2, Copy, X } from 'lucide-react';
 
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
   <button 
@@ -53,7 +50,6 @@ const ApprovalRuleWizard = () => {
         <main className="flex-1 overflow-y-auto p-8 pb-32">
           <div className="max-w-[1000px] mx-auto space-y-6">
             
-            {/* Header Area */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <button onClick={() => navigate('/settings')} className="w-10 h-10 bg-white border border-[#ECECF1] rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
@@ -74,10 +70,9 @@ const ApprovalRuleWizard = () => {
               </div>
             </div>
 
-            {/* Wizard Navigation */}
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] mb-6 flex justify-between items-center relative">
               <div className="absolute left-10 right-10 top-1/2 h-0.5 bg-gray-100 -z-0"></div>
-              {steps.map((step: any, idx: any) => (
+              {steps.map((step: any) => (
                 <div key={step.id} className="relative z-10 flex flex-col items-center gap-2 bg-white px-2">
                   <button 
                     onClick={() => setCurrentStep(step.id)}
@@ -93,7 +88,6 @@ const ApprovalRuleWizard = () => {
               ))}
             </div>
 
-            {/* Wizard Content Steps */}
             <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1] min-h-[500px]">
               
               {currentStep === 1 && (
@@ -241,7 +235,6 @@ const ApprovalRuleWizard = () => {
           </div>
         </main>
 
-        {/* Floating Bottom Bar for Next / Save */}
         <div className="fixed bottom-0 right-0 left-[260px] bg-white border-t border-[#ECECF1] shadow-[0_-4px_24px_rgba(0,0,0,0.02)] p-4 flex justify-between gap-4 z-20">
           <button 
             onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
@@ -267,7 +260,6 @@ const ApprovalRuleWizard = () => {
           )}
         </div>
 
-        {/* Delete Confirmation Modal */}
         {showDeleteModal && (
           <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-[24px] p-8 w-full max-w-md shadow-xl border border-[#ECECF1]">

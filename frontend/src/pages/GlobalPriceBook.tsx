@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import TopHeader from '../components/TopHeader';
 import Pagination from '../components/Pagination';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { catalogService } from '../services/catalogService';
-import { 
-  Search, Bell, History as ActivityIcon, Printer, 
-  Upload, ChevronDown, Plus, LayoutGrid, List, MoreVertical,
-  Loader, X, Image as ImageIcon, Edit3, Trash2
-} from 'lucide-react';
+import { Upload, ChevronDown, Plus, LayoutGrid, List, MoreVertical, Loader, X, Image as ImageIcon, Edit3, Trash2, Settings2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { CatalogCategoryItem, catalogCategoryService, defaultCatalogCategories } from '../services/catalogCategoryService';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 };
 
-const SEASONAL_MULTIPLIER = 1.15;
+const DEFAULT_SEASONAL_PERCENTAGE = 15;
+const SEASONAL_PERCENTAGE_STORAGE_KEY = 'price_book_seasonal_percentage';
 
 const normalizeItemType = (value: string) => {
   const normalized = String(value || '').trim().toUpperCase();
@@ -26,10 +25,7 @@ const normalizeItemType = (value: string) => {
   return normalized;
 };
 
-const tabToItemType = (tab: string) => {
-  if (tab === 'Floral & Decoration') return 'FLORAL_DECORATION';
-  return tab.toUpperCase();
-};
+const tabToItemType = (tab: string) => normalizeItemType(tab);
 
 const inferItemType = (itemName: string) => {
   if (/ballroom|atrium|terrace|lounge|cellar|tent|hall|room|plaza|venue|resort|banquet/i.test(itemName)) {
@@ -48,110 +44,83 @@ const inferItemType = (itemName: string) => {
 // INLINE COMPONENTS WITH PROPS
 // ==========================================
 
-const PriceBookHeader = ({
-  searchQuery,
-  setSearchQuery,
-}: {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-}) => {
-  const navigate = useNavigate();
-  const headerTabs = [
-    { label: 'All Quotes', path: '/quotations/master' },
-    { label: 'Drafts', path: '/quotations/drafts' },
-    { label: 'Pending Approval', path: '/quotations/approval-workbench' },
-    { label: 'History', path: '/quotations/history-center' },
-  ];
-
-  return (
-    <div className="h-[72px] bg-white border-b border-[#ECECF1] px-8 flex items-center justify-between sticky top-0 z-10 shrink-0">
-      <div className="w-[200px]">
-        <h2 className="text-[20px] font-bold text-red-700 tracking-tight leading-tight">
-          Quotation<br/>Management
-        </h2>
-      </div>
-      <div className="flex-1 flex items-center gap-8 h-full px-4 overflow-x-auto no-scrollbar">
-        <div className="flex items-center h-full gap-6 shrink-0">
-          {headerTabs.map((tab: any, idx: any) => (
-            <button
-              key={idx}
-              onClick={() => navigate(tab.path)}
-              className={`h-full flex items-center relative text-[15px] font-semibold transition-colors ${
-                tab.active ? 'text-red-700' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {tab.label}
-              {tab.active && (
-                <div className="absolute bottom-0 left-0 w-full h-[3px] bg-red-600 rounded-t-full" />
-              )}
-            </button>
-          ))}
-        </div>
-        <div className="relative ml-4 shrink-0">
-          <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search price book..."
-            className="w-[280px] h-10 pl-10 pr-4 bg-gray-50 border border-transparent rounded-full text-[14px] font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 transition-all placeholder:text-gray-400"
-          />
-        </div>
-      </div>
-      <div className="flex items-center gap-5 shrink-0 pl-4">
-        <button onClick={() => navigate('/notifications')} className="relative text-gray-500 hover:text-gray-700 transition-colors" aria-label="Open notifications">
-          <Bell className="w-[22px] h-[22px]" />
-        </button>
-        <button onClick={() => navigate('/activity-timeline')} className="relative text-gray-500 hover:text-gray-700 transition-colors" aria-label="Open activity timeline">
-          <ActivityIcon className="w-[22px] h-[22px]" />
-        </button>
-        <button onClick={() => window.print()} className="relative text-gray-500 hover:text-gray-700 transition-colors hidden md:block" aria-label="Print page">
-          <Printer className="w-[22px] h-[22px]" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const CategoryTabs = ({ 
   activeTab, 
   setActiveTab, 
+  categories,
   seasonalPricing, 
   setSeasonalPricing, 
+  seasonalPercentage,
+  setSeasonalPercentage,
   viewMode, 
   setViewMode 
 }: { 
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  categories: CatalogCategoryItem[];
   seasonalPricing: boolean;
   setSeasonalPricing: (val: boolean) => void;
+  seasonalPercentage: number;
+  setSeasonalPercentage: (val: number) => void;
   viewMode: string;
   setViewMode: (mode: string) => void;
 }) => {
-  const categoryTabsList = ['Venues', 'Packages', 'Floral & Decoration', 'Vendors', 'Services'];
+  const navigate = useNavigate();
 
   return (
     <div className="bg-white h-[80px] rounded-[24px] shadow-sm border border-[#ECECF1] px-6 flex items-center justify-between mb-8 overflow-x-auto no-scrollbar">
       <div className="flex items-center gap-2 p-1 bg-gray-50/50 rounded-full border border-[#ECECF1] shrink-0">
-        {categoryTabsList.map((tab: any) => (
+        {categories.map((category) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={category.code}
+            onClick={() => setActiveTab(category.code)}
             className={`h-10 px-6 rounded-full text-[14px] font-bold transition-all ${
-              activeTab === tab
+              activeTab === category.code
                 ? 'bg-white text-red-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {tab}
+            {category.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => navigate('/settings/catalog-categories')}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white hover:text-red-700 hover:shadow-sm"
+          aria-label="Manage Price Book categories"
+          title="Manage Price Book categories"
+        >
+          <Settings2 className="h-4 w-4" />
+        </button>
       </div>
       <div className="flex items-center gap-8 shrink-0 pl-4">
         <div className="flex items-center gap-3">
           <span className="text-[14px] font-bold text-gray-700 hidden sm:block">Seasonal Pricing</span>
+          {seasonalPricing && (
+            <label className="flex h-9 items-center rounded-lg border border-gray-200 bg-gray-50 px-2 focus-within:border-red-400 focus-within:bg-white">
+              <span className="sr-only">Seasonal price increase percentage</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={seasonalPercentage}
+                onChange={(event) => {
+                  const value = Number(event.target.value);
+                  setSeasonalPercentage(Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0);
+                }}
+                className="w-12 bg-transparent text-right text-[13px] font-bold text-gray-900 outline-none"
+                aria-label="Seasonal price increase percentage"
+              />
+              <span className="ml-1 text-[13px] font-bold text-gray-500">%</span>
+            </label>
+          )}
           <button 
             onClick={() => setSeasonalPricing(!seasonalPricing)}
+            type="button"
+            role="switch"
+            aria-checked={seasonalPricing}
+            aria-label="Toggle seasonal pricing"
             className={`w-11 h-[26px] rounded-full transition-colors relative flex items-center px-1 ${
               seasonalPricing ? 'bg-red-600' : 'bg-gray-200'
             }`}
@@ -320,10 +289,19 @@ const fallbackVenues: any[] = [];
 
 const GlobalPriceBook = () => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [priceBooks, setPriceBooks] = useState<any[]>([]);
   const [selectedPriceBookId, setSelectedPriceBookId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState('Venues');
+  const [activeTab, setActiveTab] = useState('VENUES');
+  const [catalogCategories, setCatalogCategories] = useState<CatalogCategoryItem[]>(defaultCatalogCategories);
   const [seasonalPricing, setSeasonalPricing] = useState(false);
+  const [seasonalPercentage, setSeasonalPercentage] = useState(() => {
+    const savedValue = localStorage.getItem(SEASONAL_PERCENTAGE_STORAGE_KEY);
+    const savedPercentage = savedValue === null ? NaN : Number(savedValue);
+    return Number.isFinite(savedPercentage) && savedPercentage >= 0 && savedPercentage <= 100
+      ? savedPercentage
+      : DEFAULT_SEASONAL_PERCENTAGE;
+  });
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -333,7 +311,6 @@ const GlobalPriceBook = () => {
   const [error, setError] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const limit = 8;
 
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -356,6 +333,20 @@ const GlobalPriceBook = () => {
   const [newImageName, setNewImageName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    localStorage.setItem(SEASONAL_PERCENTAGE_STORAGE_KEY, String(seasonalPercentage));
+  }, [seasonalPercentage]);
+
+  useEffect(() => {
+    catalogCategoryService.list()
+      .then((response) => {
+        const categories = response.data?.length ? response.data : defaultCatalogCategories;
+        setCatalogCategories(categories);
+        setActiveTab((current) => categories.some((category) => category.code === current) ? current : categories[0]?.code || 'SERVICES');
+      })
+      .catch(() => setCatalogCategories(defaultCatalogCategories));
+  }, []);
+
   // 1. Fetch Price Books on mount
   useEffect(() => {
     catalogService.getPriceBooks()
@@ -374,11 +365,10 @@ const GlobalPriceBook = () => {
     setLoading(true);
     setError('');
 
-    if (activeTab === 'Packages') {
+    if (activeTab === 'PACKAGES') {
       catalogService.getPackages()
         .then(res => {
           setPackages(res.data || []);
-          setTotalItems(res.total || 0);
         })
         .catch(err => setError(`Failed to load packages: ${err.message}`))
         .finally(() => setLoading(false));
@@ -391,7 +381,6 @@ const GlobalPriceBook = () => {
       catalogService.getRateCards(selectedPriceBookId)
         .then(res => {
           setRateCards(res.data || []);
-          setTotalItems(res.total || 0);
         })
         .catch(err => setError(`Failed to load rate cards: ${err.message}`))
         .finally(() => setLoading(false));
@@ -402,7 +391,8 @@ const GlobalPriceBook = () => {
   const mapRateCardToCard = (rc: any) => {
     const baseRate = Number(rc.rate || 0);
     const cost = Number(rc.cost || 0);
-    const displayRate = seasonalPricing ? Math.round(baseRate * SEASONAL_MULTIPLIER) : baseRate;
+    const seasonalMultiplier = 1 + seasonalPercentage / 100;
+    const displayRate = seasonalPricing ? Math.round(baseRate * seasonalMultiplier) : baseRate;
     const itemType = normalizeItemType(rc.item_type) || inferItemType(rc.item_name);
     let image = rc.image_url || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
     if (!rc.image_url && /photo|drone|video/i.test(rc.item_name)) {
@@ -416,7 +406,7 @@ const GlobalPriceBook = () => {
       title: rc.item_name,
       itemType,
       description: `Unit: ${rc.uom}. Cost: ${formatCurrency(cost)}.${seasonalPricing ? ' Seasonal pricing is applied.' : ' Standard markup applies.'}`,
-      badge: seasonalPricing ? `${rc.uom} +15%` : rc.uom,
+      badge: seasonalPricing ? `${rc.uom} +${seasonalPercentage}%` : rc.uom,
       price: formatCurrency(displayRate),
       numericRate: displayRate,
       numericCost: cost,
@@ -433,13 +423,14 @@ const GlobalPriceBook = () => {
   // Helper to map package to card object
   const mapPackageToCard = (pkg: any) => {
     const baseRate = Number(pkg.base_price || 0);
-    const displayRate = seasonalPricing ? Math.round(baseRate * SEASONAL_MULTIPLIER) : baseRate;
+    const seasonalMultiplier = 1 + seasonalPercentage / 100;
+    const displayRate = seasonalPricing ? Math.round(baseRate * seasonalMultiplier) : baseRate;
     return {
       id: pkg.package_id,
       itemKind: 'PACKAGE',
       title: pkg.name,
       description: `All-inclusive standard package for special events.${seasonalPricing ? ' Seasonal pricing is applied.' : ''}`,
-      badge: seasonalPricing ? 'Package +15%' : 'Package',
+      badge: seasonalPricing ? `Package +${seasonalPercentage}%` : 'Package',
       price: formatCurrency(displayRate),
       numericRate: displayRate,
       originalRate: baseRate,
@@ -456,7 +447,7 @@ const GlobalPriceBook = () => {
   // Process and filter displayed items
   let displayedItems: any[] = [];
   
-  if (activeTab === 'Packages') {
+  if (activeTab === 'PACKAGES') {
     displayedItems = packages
       .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
       .map(mapPackageToCard);
@@ -473,7 +464,7 @@ const GlobalPriceBook = () => {
     displayedItems = filteredRateCards.map(mapRateCardToCard);
 
     // Fallback to an empty venues list if no database rate cards match.
-    if (activeTab === 'Venues' && displayedItems.length === 0 && searchQuery === '') {
+    if (activeTab === 'VENUES' && displayedItems.length === 0 && searchQuery === '') {
       displayedItems = fallbackVenues;
     }
   }
@@ -633,7 +624,7 @@ const GlobalPriceBook = () => {
     setEditingRateCard(null);
     setEditingPackage(null);
     setNewItemName('');
-    setNewItemType(activeTab === 'Packages' ? 'SERVICES' : tabToItemType(activeTab));
+    setNewItemType(activeTab === 'PACKAGES' ? 'SERVICES' : tabToItemType(activeTab));
     setNewUom('DAY');
     setNewRate('');
     setNewCost('');
@@ -667,7 +658,7 @@ const GlobalPriceBook = () => {
     setEditingPackage(null);
     setNewItemName(item.title || '');
     setNewItemType(item.itemType || tabToItemType(activeTab));
-    setNewUom(String(item.badge || item.unit || 'DAY').replace(' +15%', '').toUpperCase());
+    setNewUom(String(item.badge || item.unit || 'DAY').replace(/\s\+\d+(?:\.\d+)?%$/, '').toUpperCase());
     setNewRate(String(item.originalRate ?? item.numericRate ?? ''));
     setNewCost(String(item.numericCost ?? ''));
     setNewTaxPercent(String(item.taxPercent ?? 0));
@@ -802,12 +793,11 @@ const GlobalPriceBook = () => {
       <Sidebar />
       
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden relative w-full">
-        <PriceBookHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <TopHeader contextSearchValue={searchQuery} onContextSearchChange={setSearchQuery} contextSearchPlaceholder="Search price book..." />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-12 overflow-x-hidden">
           <div className="max-w-[1400px] mx-auto space-y-8">
             
-            {/* Page Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-[600px]">
                 <span className="inline-block bg-[#FCE8E8] text-[#B3262E] text-[12px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
@@ -820,8 +810,7 @@ const GlobalPriceBook = () => {
                   Manage enterprise-wide service rates, venue fees, and vendor markups with seasonal intelligent adjustments.
                 </p>
 
-                {/* Price Book Selection Dropdown */}
-                {activeTab !== 'Packages' && priceBooks.length > 0 && (
+                {activeTab !== 'PACKAGES' && priceBooks.length > 0 && (
                   <div className="flex items-center gap-3 mt-4">
                     <span className="text-sm font-bold text-gray-500">Selected Price Book:</span>
                     <select 
@@ -835,11 +824,19 @@ const GlobalPriceBook = () => {
                         </option>
                       ))}
                     </select>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/settings/price-books')}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#ECECF1] bg-white text-gray-500 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+                      aria-label="Manage price books"
+                      title="Manage price books"
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </button>
                   </div>
                 )}
               </div>
 
-              {/* Header Actions */}
               <div className="flex flex-wrap items-center gap-3 shrink-0">
                 <input
                   ref={fileInputRef}
@@ -877,7 +874,7 @@ const GlobalPriceBook = () => {
                         Download Template
                       </button>
                       <button 
-                        disabled={submitting || activeTab === 'Packages'}
+                        disabled={submitting || activeTab === 'PACKAGES'}
                         onClick={() => { fileInputRef.current?.click(); setShowImportExportDropdown(false); }}
                         className="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-[14px] font-bold text-gray-700 transition-colors disabled:text-gray-300 disabled:cursor-not-allowed"
                       >
@@ -898,17 +895,18 @@ const GlobalPriceBook = () => {
               </div>
             </div>
 
-            {/* Category Filter Bar */}
             <CategoryTabs 
               activeTab={activeTab} 
+              categories={catalogCategories}
               setActiveTab={(tab) => { setActiveTab(tab); setCurrentPage(1); }} 
               seasonalPricing={seasonalPricing} 
               setSeasonalPricing={setSeasonalPricing} 
+              seasonalPercentage={seasonalPercentage}
+              setSeasonalPercentage={setSeasonalPercentage}
               viewMode={viewMode} 
               setViewMode={setViewMode} 
             />
 
-            {/* Error or Loading wrapper */}
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <Loader className="w-10 h-10 text-red-500 animate-spin" />
@@ -919,7 +917,7 @@ const GlobalPriceBook = () => {
               </div>
             ) : paginatedItems.length === 0 ? (
               <div className="text-center py-20 text-gray-400 font-semibold">
-                No items found for category "{activeTab}".
+                No items found for category "{catalogCategories.find((category) => category.code === activeTab)?.label || activeTab}".
               </div>
             ) : (
               /* Price Book Grid / List */
@@ -948,7 +946,6 @@ const GlobalPriceBook = () => {
               </div>
             )}
 
-            {/* Footer Area */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 mt-4 gap-6 border-t border-[#ECECF1]">
               <PriceMetrics totalItems={totalItemCount} avgRate={avgRate} />
               <Pagination 
@@ -964,11 +961,9 @@ const GlobalPriceBook = () => {
         </main>
       </div>
 
-      {/* Create New Rate Modal Overlay */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-[28px] w-full max-w-[500px] shadow-2xl overflow-hidden border border-[#ECECF1] animate-in zoom-in-95 duration-200">
-            {/* Header */}
             <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
               <h3 className="text-[20px] font-bold text-gray-900">
                 {editingPackage ? 'Edit Package' : editingRateCard ? 'Edit Rate Card' : 'Create New Rate/Card'}
@@ -984,7 +979,6 @@ const GlobalPriceBook = () => {
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSaveRate}>
               <div className="p-6 space-y-5">
                 <div>
@@ -1008,12 +1002,11 @@ const GlobalPriceBook = () => {
                       onChange={e => setNewItemType(e.target.value)}
                       className="w-full h-11 px-4 bg-gray-50 border border-transparent rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-red-400 focus:outline-none transition-all"
                     >
-                      <option value="PACKAGES">Packages</option>
-                      <option value="VENUES">Venues</option>
-                      <option value="FLORAL_DECORATION">Floral & Decoration</option>
-                      <option value="VENDORS">Vendors</option>
-                      <option value="SERVICES">Services</option>
+                      {catalogCategories.filter((category) => category.code !== 'PACKAGES').map((category) => (
+                        <option key={category.code} value={category.code}>{category.label}</option>
+                      ))}
                     </select>
+
                   </div>
                   <div>
                     <label className="block text-[13px] font-bold text-gray-700 mb-1.5">UOM (Unit) *</label>
@@ -1097,7 +1090,6 @@ const GlobalPriceBook = () => {
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="p-6 border-t border-[#ECECF1] bg-gray-50 flex items-center justify-end gap-3">
                 <button
                   type="button"

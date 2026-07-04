@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Calculator, Save, AlertTriangle, History, 
-  RotateCcw, Eye, CheckCircle2 
-} from 'lucide-react';
+import { ArrowLeft, Calculator, Save, AlertTriangle, History, RotateCcw, Eye, CheckCircle2 } from 'lucide-react';
 
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
   <button 
@@ -64,7 +61,6 @@ const AutomatedNumbering = () => {
         <main className="flex-1 overflow-y-auto p-8 pb-32">
           <div className="max-w-[1000px] mx-auto space-y-6">
             
-            {/* Header Area */}
             <div className="flex items-center gap-4 mb-8">
               <button onClick={() => navigate('/settings')} className="w-10 h-10 bg-white border border-[#ECECF1] rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
                 <ArrowLeft className="w-5 h-5" />
@@ -77,10 +73,8 @@ const AutomatedNumbering = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              {/* Main Form Area */}
               <div className="lg:col-span-2 space-y-6">
                 
-                {/* Configuration Card */}
                 <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1]">
                   <div className="flex items-center gap-3 mb-8 pb-6 border-b border-[#ECECF1]">
                     <div className="w-10 h-10 rounded-[12px] bg-red-50 flex items-center justify-center text-red-600">
@@ -152,7 +146,6 @@ const AutomatedNumbering = () => {
                   </div>
                 </div>
 
-                {/* Counter & Reset Card */}
                 <div className="bg-white rounded-[24px] p-8 shadow-sm border border-[#ECECF1]">
                   <h2 className="text-[18px] font-bold text-gray-900 mb-6">Counter Management</h2>
                   <div className="flex gap-6">
@@ -190,10 +183,8 @@ const AutomatedNumbering = () => {
 
               </div>
 
-              {/* Right Column: Preview & Audit */}
               <div className="space-y-6">
                 
-                {/* Live Preview Card */}
                 <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[24px] p-6 shadow-md text-white">
                   <div className="flex items-center gap-2 mb-6 text-gray-300">
                     <Eye className="w-5 h-5" />
@@ -205,7 +196,6 @@ const AutomatedNumbering = () => {
                   </div>
                 </div>
 
-                {/* Audit History */}
                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
                   <div className="flex items-center gap-2 mb-6">
                     <History className="w-5 h-5 text-gray-400" />
@@ -232,7 +222,6 @@ const AutomatedNumbering = () => {
           </div>
         </main>
 
-        {/* Floating Save Bar */}
         <div className="fixed bottom-0 right-0 left-[260px] bg-white border-t border-[#ECECF1] shadow-[0_-4px_24px_rgba(0,0,0,0.02)] p-4 flex justify-end gap-4 z-20">
           <button 
             onClick={() => navigate('/settings')}
@@ -255,7 +244,6 @@ const AutomatedNumbering = () => {
           </button>
         </div>
 
-        {/* Reset Confirmation Modal */}
         {showResetModal && (
           <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-[24px] p-8 w-full max-w-md shadow-xl border border-[#ECECF1]">

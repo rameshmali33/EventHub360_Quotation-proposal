@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const MetricCard = ({ label, value  }: any) => (
   <div className="bg-[#EEF2FF] rounded-[16px] px-5 py-3 flex flex-col justify-center min-w-[140px]">

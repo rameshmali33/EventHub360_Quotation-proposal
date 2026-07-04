@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Trash2, PlusCircle } from 'lucide-react';
 
 const QuotationTableEditor = ({ items, onAdd, onDelete, onUpdate  }: any) => {
@@ -17,7 +17,7 @@ const QuotationTableEditor = ({ items, onAdd, onDelete, onUpdate  }: any) => {
             </tr>
           </thead>
           <tbody>
-            {items.map((item: any, index: any) => {
+            {items.map((item: any) => {
               const qty = Number(item.qty) || 0;
               const price = Number(item.price) || 0;
               const discount = Number(item.discount) || 0;

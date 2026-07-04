@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Archive, Search, Trash2, RotateCcw
-} from 'lucide-react';
+import { ArrowLeft, Archive, Search, Trash2, RotateCcw } from 'lucide-react';
 
 const DraftArchive = () => {
   const navigate = useNavigate();
@@ -100,7 +98,6 @@ const DraftArchive = () => {
         </main>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[24px] p-8 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">

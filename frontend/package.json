@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "tsc --noEmit -p tsconfig.json --noUnusedLocals --noUnusedParameters && eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -37,5 +37,6 @@
     "puppeteer": "^25.1.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.12"
-  }
+  },
+  "description": "EventHub 360 web application"
 }

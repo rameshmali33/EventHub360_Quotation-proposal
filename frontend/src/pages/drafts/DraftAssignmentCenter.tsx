@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Users, Search, Check, AlertCircle
-} from 'lucide-react';
+import { ArrowLeft, Search, Check, AlertCircle } from 'lucide-react';
 
 const DraftAssignmentCenter = () => {
   const navigate = useNavigate();

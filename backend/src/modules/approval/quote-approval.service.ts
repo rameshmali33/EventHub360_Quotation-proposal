@@ -1,4 +1,8 @@
-﻿import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+﻿import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { QuotationService } from '../quotation/quotation.service';
 import { QuotationStatus } from '../quotation/dto/create-quotation.dto';
 import { RequestApprovalDto } from './dto/request-approval.dto';
@@ -57,15 +61,22 @@ export interface ApprovalHistory {
 function serializeDbObject(obj: any): any {
   if (!obj) return obj;
   if (Array.isArray(obj)) {
-    return obj.map(item => serializeDbObject(item));
+    return obj.map((item) => serializeDbObject(item));
   }
   const serialized = { ...obj };
   for (const key of Object.keys(serialized)) {
     if (typeof serialized[key] === 'bigint') {
       serialized[key] = Number(serialized[key]);
-    } else if (serialized[key] && typeof serialized[key].toNumber === 'function') {
+    } else if (
+      serialized[key] &&
+      typeof serialized[key].toNumber === 'function'
+    ) {
       serialized[key] = serialized[key].toNumber();
-    } else if (typeof serialized[key] === 'object' && serialized[key] !== null && !(serialized[key] instanceof Date)) {
+    } else if (
+      typeof serialized[key] === 'object' &&
+      serialized[key] !== null &&
+      !(serialized[key] instanceof Date)
+    ) {
       serialized[key] = serializeDbObject(serialized[key]);
     }
   }
@@ -75,7 +86,7 @@ function serializeDbObject(obj: any): any {
 async function enrichApproval(prisma: PrismaService, approval: any) {
   if (!approval) return approval;
   const quotation = await prisma.quotation.findFirst({
-    where: { quotation_id: BigInt(approval.quotation_id) }
+    where: { quotation_id: BigInt(approval.quotation_id) },
   });
   const subtotal = quotation ? Number(quotation.subtotal) : 0;
   const margin = quotation ? Number(quotation.margin) : 0;
@@ -84,7 +95,7 @@ async function enrichApproval(prisma: PrismaService, approval: any) {
   // Read discount percent and notes from history log if possible
   const firstHistory = await prisma.quoteApprovalHistory.findFirst({
     where: { approval_id: BigInt(approval.approval_id), action: 'REQUESTED' },
-    orderBy: { created_at: 'asc' }
+    orderBy: { created_at: 'asc' },
   });
 
   let discountPercent = 0;
@@ -122,7 +133,7 @@ export class QuoteApprovalService {
 
   async findAll() {
     const dbApprovals = await this.prisma.quoteApproval.findMany({
-      where: { is_active: true }
+      where: { is_active: true },
     });
     const enriched: any[] = [];
     for (const app of dbApprovals) {
@@ -143,22 +154,27 @@ export class QuoteApprovalService {
 
   async requestApproval(quotationId: number, requestDto: RequestApprovalDto) {
     const quotation = await this.quotationService.findOne(quotationId);
-    
+
     const existingPending = await this.prisma.quoteApproval.findFirst({
-      where: { quotation_id: BigInt(quotationId), status: ApprovalStatus.PENDING, is_active: true }
+      where: {
+        quotation_id: BigInt(quotationId),
+        status: ApprovalStatus.PENDING,
+        is_active: true,
+      },
     });
     if (existingPending) {
-      throw new BadRequestException(`Quotation ${quotationId} already has a pending approval request`);
+      throw new BadRequestException(
+        `Quotation ${quotationId} already has a pending approval request`,
+      );
     }
 
     const subtotal = Number(quotation.subtotal) || 0;
     const margin = Number(quotation.margin) || 0;
     const marginPercent = subtotal > 0 ? (margin / subtotal) * 100 : 0;
-    const discountPercent = requestDto.discountPercent !== undefined ? requestDto.discountPercent : 0;
+    const discountPercent =
+      requestDto.discountPercent !== undefined ? requestDto.discountPercent : 0;
 
     let requiredRole: ApprovalTier = ApprovalTier.SALES_MANAGER;
-    const requiresApproval = true;
-
     if (discountPercent > 15 || marginPercent < 10) {
       requiredRole = ApprovalTier.COMPANY_OWNER;
     }
@@ -166,7 +182,7 @@ export class QuoteApprovalService {
     const status = ApprovalStatus.PENDING;
 
     const parentQtn = await this.prisma.quotation.findFirst({
-      where: { quotation_id: BigInt(quotationId) }
+      where: { quotation_id: BigInt(quotationId) },
     });
     if (!parentQtn) {
       throw new NotFoundException(`Quotation with ID ${quotationId} not found`);
@@ -182,7 +198,7 @@ export class QuoteApprovalService {
         status,
         decided_at: null,
         is_active: true,
-      }
+      },
     });
 
     const newQuoteStatus = QuotationStatus.PENDING_APPROVAL;
@@ -196,7 +212,7 @@ export class QuoteApprovalService {
         action: 'REQUESTED',
         performed_by: 'Sales Executive',
         notes: historyNotes,
-      }
+      },
     });
 
     return await enrichApproval(this.prisma, newApproval);
@@ -205,7 +221,9 @@ export class QuoteApprovalService {
   async approve(approvalId: number, actionDto: ApprovalActionDto) {
     const approval = await this.findOne(approvalId);
     if (approval.status !== ApprovalStatus.PENDING) {
-      throw new BadRequestException(`Approval is not in PENDING status (current: ${approval.status})`);
+      throw new BadRequestException(
+        `Approval is not in PENDING status (current: ${approval.status})`,
+      );
     }
 
     const updated = await this.prisma.quoteApproval.update({
@@ -214,18 +232,25 @@ export class QuoteApprovalService {
         status: ApprovalStatus.APPROVED,
         decided_at: new Date(),
         updated_at: new Date(),
-      }
+      },
     });
 
-    await this.quotationService.update(Number(approval.quotation_id), { status: QuotationStatus.APPROVED });
+    await this.quotationService.update(Number(approval.quotation_id), {
+      status: QuotationStatus.APPROVED,
+    });
 
     await this.prisma.quoteApprovalHistory.create({
       data: {
         approval_id: BigInt(approvalId),
         action: 'APPROVED',
-        performed_by: approval.required_role === ApprovalTier.COMPANY_OWNER ? 'Company Owner' : 'Sales Manager',
-        notes: actionDto.reason ? `Approved. Reason: ${actionDto.reason}` : 'Approved.',
-      }
+        performed_by:
+          approval.required_role === ApprovalTier.COMPANY_OWNER
+            ? 'Company Owner'
+            : 'Sales Manager',
+        notes: actionDto.reason
+          ? `Approved. Reason: ${actionDto.reason}`
+          : 'Approved.',
+      },
     });
 
     return await enrichApproval(this.prisma, updated);
@@ -234,7 +259,9 @@ export class QuoteApprovalService {
   async reject(approvalId: number, actionDto: ApprovalActionDto) {
     const approval = await this.findOne(approvalId);
     if (approval.status !== ApprovalStatus.PENDING) {
-      throw new BadRequestException(`Approval is not in PENDING status (current: ${approval.status})`);
+      throw new BadRequestException(
+        `Approval is not in PENDING status (current: ${approval.status})`,
+      );
     }
 
     const updated = await this.prisma.quoteApproval.update({
@@ -243,18 +270,25 @@ export class QuoteApprovalService {
         status: ApprovalStatus.REJECTED,
         decided_at: new Date(),
         updated_at: new Date(),
-      }
+      },
     });
 
-    await this.quotationService.update(Number(approval.quotation_id), { status: QuotationStatus.REJECTED });
+    await this.quotationService.update(Number(approval.quotation_id), {
+      status: QuotationStatus.REJECTED,
+    });
 
     await this.prisma.quoteApprovalHistory.create({
       data: {
         approval_id: BigInt(approvalId),
         action: 'REJECTED',
-        performed_by: approval.required_role === ApprovalTier.COMPANY_OWNER ? 'Company Owner' : 'Sales Manager',
-        notes: actionDto.reason ? `Rejected. Reason: ${actionDto.reason}` : 'Rejected.',
-      }
+        performed_by:
+          approval.required_role === ApprovalTier.COMPANY_OWNER
+            ? 'Company Owner'
+            : 'Sales Manager',
+        notes: actionDto.reason
+          ? `Rejected. Reason: ${actionDto.reason}`
+          : 'Rejected.',
+      },
     });
 
     return await enrichApproval(this.prisma, updated);
@@ -263,7 +297,9 @@ export class QuoteApprovalService {
   async requestChanges(approvalId: number, actionDto: ApprovalActionDto) {
     const approval = await this.findOne(approvalId);
     if (approval.status !== ApprovalStatus.PENDING) {
-      throw new BadRequestException(`Approval is not in PENDING status (current: ${approval.status})`);
+      throw new BadRequestException(
+        `Approval is not in PENDING status (current: ${approval.status})`,
+      );
     }
 
     const updated = await this.prisma.quoteApproval.update({
@@ -272,32 +308,39 @@ export class QuoteApprovalService {
         status: ApprovalStatus.CHANGES_REQUESTED,
         decided_at: new Date(),
         updated_at: new Date(),
-      }
+      },
     });
 
-    await this.quotationService.update(Number(approval.quotation_id), { status: QuotationStatus.CHANGES_REQUESTED });
+    await this.quotationService.update(Number(approval.quotation_id), {
+      status: QuotationStatus.CHANGES_REQUESTED,
+    });
 
     await this.prisma.quoteApprovalHistory.create({
       data: {
         approval_id: BigInt(approvalId),
         action: 'CHANGES_REQUESTED',
-        performed_by: approval.required_role === ApprovalTier.COMPANY_OWNER ? 'Company Owner' : 'Sales Manager',
-        notes: actionDto.reason ? `Changes Requested. Reason: ${actionDto.reason}` : 'Changes Requested.',
-      }
+        performed_by:
+          approval.required_role === ApprovalTier.COMPANY_OWNER
+            ? 'Company Owner'
+            : 'Sales Manager',
+        notes: actionDto.reason
+          ? `Changes Requested. Reason: ${actionDto.reason}`
+          : 'Changes Requested.',
+      },
     });
 
     return await enrichApproval(this.prisma, updated);
   }
 
   async addComment(approvalId: number, commentDto: ApprovalCommentDto) {
-    const approval = await this.findOne(approvalId);
+    await this.findOne(approvalId);
 
     const createdComment = await this.prisma.quoteApprovalComment.create({
       data: {
         approval_id: BigInt(approvalId),
         comment: commentDto.comment,
         created_by: BigInt(1),
-      }
+      },
     });
 
     await this.prisma.quoteApprovalHistory.create({
@@ -306,7 +349,7 @@ export class QuoteApprovalService {
         action: 'COMMENT_ADDED',
         performed_by: 'User',
         notes: `Added comment: "${commentDto.comment}"`,
-      }
+      },
     });
 
     return serializeDbObject(createdComment);
@@ -316,11 +359,8 @@ export class QuoteApprovalService {
     await this.findOne(approvalId); // Verify existence
     const historyList = await this.prisma.quoteApprovalHistory.findMany({
       where: { approval_id: BigInt(approvalId) },
-      orderBy: { created_at: 'asc' }
+      orderBy: { created_at: 'asc' },
     });
     return serializeDbObject(historyList);
   }
 }
-
-
-

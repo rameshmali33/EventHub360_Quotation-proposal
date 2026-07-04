@@ -1,9 +1,6 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  X, Copy, Link as LinkIcon, Mail, Users, Download, 
-  FileText, Share2, Trash2, CheckCircle2, AlertTriangle, Image, Type
-} from 'lucide-react';
+
+import { useNavigate } from 'react-router-dom';
+import { X, Copy, Link as LinkIcon, Mail, Download, FileText, Share2, Trash2, AlertTriangle, Image, Type } from 'lucide-react';
 
 const ModalBackdrop = ({ children, onClose  }: any) => (
   <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Palette, Type, Droplet, LayoutTemplate, Image as ImageIcon, ChevronRight, X, AlertCircle } from 'lucide-react';
 
 const tools = [
@@ -43,11 +43,9 @@ const ProposalToolsPanel = () => {
         })}
       </div>
 
-      {/* Slide-over Settings Modal/Overlay */}
       {activeTool && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[28px] w-full max-w-[420px] shadow-2xl overflow-hidden border border-[#ECECF1] animate-in fade-in zoom-in duration-200">
-            {/* Header */}
             <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
               <h3 className="text-[20px] font-bold text-gray-950 flex items-center gap-2">
                 {activeTool} Settings
@@ -60,7 +58,6 @@ const ProposalToolsPanel = () => {
               </button>
             </div>
 
-            {/* Body */}
             <div className="p-6 space-y-6">
               <p className="text-[14px] font-medium text-gray-500 leading-relaxed">
                 Configure global {activeTool.toLowerCase()} profiles to update the proposal's theme layer.
@@ -123,7 +120,6 @@ const ProposalToolsPanel = () => {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="p-6 border-t border-[#ECECF1] bg-gray-50 flex justify-end">
               <button 
                 onClick={() => setActiveTool(null)}

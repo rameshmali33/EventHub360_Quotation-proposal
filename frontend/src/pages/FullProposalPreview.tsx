@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, Download, Send, ChevronRight, ChevronLeft, Save,
-  X, CheckCircle2, FileText
-} from 'lucide-react';
+import { Download, ChevronRight, ChevronLeft, X, CheckCircle2, FileText } from 'lucide-react';
 
 const FullProposalPreview = () => {
   const navigate = useNavigate();
@@ -110,7 +107,6 @@ const FullProposalPreview = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 font-sans">
       
-      {/* HEADER */}
       <div className="h-[72px] bg-black/50 backdrop-blur-md border-b border-gray-800 px-8 flex items-center justify-between shrink-0 sticky top-0 z-20">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
@@ -157,9 +153,7 @@ const FullProposalPreview = () => {
         </div>
       </div>
 
-      {/* DOCUMENT VIEWER */}
       <main className="flex-1 overflow-y-auto p-10 flex items-center justify-center bg-gray-900">
-        {/* A4 sized paper container */}
         <div className="w-[850px] h-[1100px] bg-white shadow-2xl relative transition-all duration-500 transform-gpu origin-center overflow-hidden">
           {pages[currentPage - 1].content}
         </div>

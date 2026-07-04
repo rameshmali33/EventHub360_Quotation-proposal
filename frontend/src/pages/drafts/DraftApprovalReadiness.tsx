@@ -1,10 +1,8 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import TopHeader from '../../components/TopHeader';
-import { 
-  ArrowLeft, Activity, AlertCircle, CheckCircle2, ChevronRight, XCircle
-} from 'lucide-react';
+import { ArrowLeft, Activity, AlertCircle, CheckCircle2, ChevronRight, XCircle } from 'lucide-react';
 
 const DraftApprovalReadiness = () => {
   const navigate = useNavigate();
@@ -44,7 +42,6 @@ const DraftApprovalReadiness = () => {
 
               <div className="p-8 space-y-8">
                 
-                {/* Missing Fields */}
                 <div>
                   <h3 className="text-[16px] font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <XCircle className="w-5 h-5 text-red-500" /> Critical Missing Fields
@@ -77,7 +74,6 @@ const DraftApprovalReadiness = () => {
                   </div>
                 </div>
 
-                {/* Validation Checks */}
                 <div>
                   <h3 className="text-[16px] font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-orange-500" /> Policy & Margin Warnings
@@ -93,7 +89,6 @@ const DraftApprovalReadiness = () => {
                   </div>
                 </div>
 
-                {/* Passed Checks */}
                 <div>
                   <h3 className="text-[16px] font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Passed Validation

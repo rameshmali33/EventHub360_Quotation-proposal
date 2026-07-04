@@ -1,47 +1,80 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
-import { RateCardService } from './rate-card.service';
-import { CreateRateCardDto, UpdateRateCardDto } from './dto/create-rate-card.dto';
-import { CatalogListQueryDto } from './dto/catalog-list-query.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AppRole } from '../../common/auth/roles';
+import { Roles } from '../../common/auth/roles.decorator';
+import { RolesGuard } from '../../common/auth/roles.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RateCardService } from './rate-card.service';
+import {
+  CreateRateCardDto,
+  UpdateRateCardDto,
+} from './dto/create-rate-card.dto';
+import { CatalogListQueryDto } from './dto/catalog-list-query.dto';
 
 @ApiTags('rate-cards')
 @Controller('api/v1')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class RateCardController {
   constructor(private readonly rateCardService: RateCardService) {}
 
   @Post('price-books/:priceBookId/rate-cards')
+  @Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER)
   @ApiOperation({ summary: 'Add a rate card to a price book' })
   @ApiResponse({ status: 201, description: 'Rate card successfully created.' })
   create(
-    @Param('priceBookId', ParseIntPipe) priceBookId: number,
-    @Body() createDto: CreateRateCardDto,
+    @Param('priceBookId', ParseIntPipe) id: number,
+    @Body() dto: CreateRateCardDto,
   ) {
-    return this.rateCardService.create(priceBookId, createDto);
+    return this.rateCardService.create(id, dto);
   }
 
   @Get('price-books/:priceBookId/rate-cards')
-  @ApiOperation({ summary: 'List rate cards for a price book' })
+  @Roles(
+    AppRole.ADMINISTRATOR,
+    AppRole.OWNER,
+    AppRole.MANAGER,
+    AppRole.EXECUTIVE,
+  )
   findAll(
-    @Param('priceBookId', ParseIntPipe) priceBookId: number,
+    @Param('priceBookId', ParseIntPipe) id: number,
     @Query() query: CatalogListQueryDto,
   ) {
-    return this.rateCardService.findAllByPriceBook(priceBookId, query);
+    return this.rateCardService.findAllByPriceBook(id, query);
   }
 
   @Get('rate-cards/:id')
-  @ApiOperation({ summary: 'Get a specific rate card by ID' })
+  @Roles(
+    AppRole.ADMINISTRATOR,
+    AppRole.OWNER,
+    AppRole.MANAGER,
+    AppRole.EXECUTIVE,
+  )
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.rateCardService.findOne(id);
   }
 
   @Patch('rate-cards/:id')
-  @ApiOperation({ summary: 'Update a rate card' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateRateCardDto) {
-    return this.rateCardService.update(id, updateDto);
+  @Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER)
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateRateCardDto,
+  ) {
+    return this.rateCardService.update(id, dto);
   }
 
   @Delete('rate-cards/:id')
-  @ApiOperation({ summary: 'Soft delete a rate card' })
+  @Roles(AppRole.ADMINISTRATOR, AppRole.OWNER, AppRole.MANAGER)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.rateCardService.remove(id);
   }

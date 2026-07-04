@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { MessageSquare, GitCommit } from 'lucide-react';
 
 export const CollaborationCard = () => {

@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const DocumentThumbnail = ({ page, index, active, onSelect  }: any) => {
   return (
@@ -24,6 +24,27 @@ const DocumentThumbnail = ({ page, index, active, onSelect  }: any) => {
           </div>
         )}
         
+        {page.type === 'quotation' && (
+          <div className="h-full w-full bg-white p-4">
+            <div className="flex items-start justify-between border-b-2 border-gray-800 pb-3">
+              <div className="h-3 w-16 rounded-sm bg-red-700" />
+              <div className="space-y-1 text-right">
+                <div className="ml-auto h-3 w-14 rounded-sm bg-gray-800" />
+                <div className="ml-auto h-1.5 w-10 rounded-full bg-gray-200" />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 border-b border-gray-200 pb-4">
+              <div className="space-y-1.5"><div className="h-1.5 w-8 rounded-full bg-gray-200" /><div className="h-2 w-16 rounded-full bg-gray-400" /></div>
+              <div className="space-y-1.5"><div className="ml-auto h-1.5 w-12 rounded-full bg-gray-200" /><div className="ml-auto h-2 w-14 rounded-full bg-gray-300" /></div>
+            </div>
+            <div className="mt-4 overflow-hidden border border-gray-200">
+              <div className="h-4 bg-gray-800" />
+              {[1, 2, 3, 4].map((row) => <div key={row} className="h-7 border-b border-gray-100 px-2 py-2"><div className="h-1.5 rounded-full bg-gray-100" /></div>)}
+            </div>
+            <div className="ml-auto mt-4 h-12 w-24 border border-gray-200 bg-gray-50" />
+          </div>
+        )}
+
         {page.type === 'moodboard' && (
           <div className="w-full h-full p-2 grid grid-cols-2 grid-rows-2 gap-2 bg-white">
             <div className="bg-[#F8E3E3] rounded-lg" />

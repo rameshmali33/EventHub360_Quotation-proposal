@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
-import { 
-  User, Settings, Bell, Shield, Clock, LogOut, Check
-} from 'lucide-react';
+import { Settings, Bell, Shield, Clock, LogOut, Check } from 'lucide-react';
 
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
@@ -75,7 +73,6 @@ const UserProfile = () => {
 
             <div className="flex flex-col md:flex-row gap-8">
               
-              {/* Settings Sidebar */}
               <div className="w-[250px] shrink-0 space-y-1">
                 {[
                   { id: 'preferences', label: 'My Preferences', icon: Settings },
@@ -99,7 +96,6 @@ const UserProfile = () => {
                 ))}
               </div>
 
-              {/* Main Settings Area */}
               <div className="flex-1 bg-white rounded-[24px] shadow-sm border border-[#ECECF1] p-8 min-h-[500px]">
                 
                 {activeTab === 'preferences' && (
@@ -205,7 +201,6 @@ const UserProfile = () => {
                   </div>
                 )}
 
-                {/* Additional tabs would be similarly structured */}
                 {(activeTab === 'notifications' || activeTab === 'security' || activeTab === 'history') && (
                   <div className="py-10 text-center">
                     <p className="text-gray-500 text-[15px] font-medium">Settings panel for {activeTab} will go here.</p>

@@ -7,6 +7,6 @@ import { PricingModule } from '../pricing/pricing.module';
   imports: [PricingModule],
   controllers: [QuotationController],
   providers: [QuotationService],
-  exports: [QuotationService]
+  exports: [QuotationService],
 })
 export class QuotationModule {}

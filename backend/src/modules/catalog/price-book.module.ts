@@ -9,6 +9,6 @@ import { PackageController } from './package.controller';
 @Module({
   controllers: [PriceBookController, RateCardController, PackageController],
   providers: [PriceBookService, RateCardService, PackageService],
-  exports: [PriceBookService, RateCardService, PackageService]
+  exports: [PriceBookService, RateCardService, PackageService],
 })
 export class PriceBookModule {}

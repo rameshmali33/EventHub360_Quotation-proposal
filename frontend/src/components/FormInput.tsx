@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const FormInput = ({ label, placeholder, type = 'text', register, name, error  }: any) => {
   return (

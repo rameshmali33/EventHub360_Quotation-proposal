@@ -42,7 +42,7 @@ export class PricingService {
 
     const lineResults: PricingLineResult[] = input.lines.map((line) => {
       const lineDiscountPercent = line.lineDiscountPercent || 0;
-      
+
       const baseAmount = line.qty * line.rate;
       const discountAmount = baseAmount * (lineDiscountPercent / 100);
       const netAmount = baseAmount - discountAmount;
@@ -67,7 +67,8 @@ export class PricingService {
     const globalDiscountAmount = input.globalDiscountAmount || 0;
     const serviceChargeAmount = input.serviceChargeAmount || 0;
 
-    const grandTotal = subtotal - globalDiscountAmount + totalTax + serviceChargeAmount;
+    const grandTotal =
+      subtotal - globalDiscountAmount + totalTax + serviceChargeAmount;
     const margin = subtotal - totalCost;
 
     let marginPercent = 0;

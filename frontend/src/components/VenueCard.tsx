@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { MoreVertical } from 'lucide-react';
 import PricingBadge from './PricingBadge';
 
@@ -6,7 +6,6 @@ const VenueCard = ({ venue  }: any) => {
   return (
     <div className="bg-white rounded-[24px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-[#ECECF1] overflow-hidden hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col group cursor-pointer h-full">
       
-      {/* Image Section */}
       <div className="relative h-[220px] w-full overflow-hidden shrink-0">
         <img 
           src={venue.image} 
@@ -14,11 +13,9 @@ const VenueCard = ({ venue  }: any) => {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         <PricingBadge text={venue.badge} />
-        {/* Gradient Overlay for better contrast on top */}
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
       </div>
 
-      {/* Content Section */}
       <div className="p-6 flex flex-col flex-1 relative">
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-[20px] font-bold text-gray-900 leading-tight pr-6">
@@ -37,7 +34,6 @@ const VenueCard = ({ venue  }: any) => {
           <div className="w-full h-px bg-[#ECECF1] mb-5"></div>
           
           <div className="flex items-end justify-between">
-            {/* Left - Base Pricing */}
             <div>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Base Pricing
@@ -52,7 +48,6 @@ const VenueCard = ({ venue  }: any) => {
               </div>
             </div>
 
-            {/* Right - Markup & Total */}
             <div className="text-right">
               <p className={`text-[12px] font-bold mb-1 ${venue.markupColor || 'text-emerald-500'}`}>
                 {venue.markupText}

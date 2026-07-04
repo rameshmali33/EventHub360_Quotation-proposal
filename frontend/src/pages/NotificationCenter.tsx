@@ -1,11 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
-import { 
-  Bell, MessageSquare, AlertCircle, ExternalLink, 
-  Check, CheckSquare, Trash2, Plus, Inbox
-} from 'lucide-react';
+import { Bell, MessageSquare, AlertCircle, ExternalLink, Check, CheckSquare, Trash2, Inbox } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -139,7 +136,6 @@ const NotificationCenter = () => {
             </div>
 
             <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] overflow-hidden">
-              {/* Filter Tabs */}
               <div className="p-4 border-b border-[#ECECF1] flex gap-2 overflow-x-auto scrollbar-hide bg-[#F8F9FC]">
                 <button 
                   onClick={() => setActiveFilter('all')}
@@ -175,7 +171,6 @@ const NotificationCenter = () => {
                 </button>
               </div>
 
-              {/* Notification List */}
               <div className="divide-y divide-[#ECECF1]">
                 {filteredNotifications.length === 0 ? (
                   <div className="p-16 text-center">

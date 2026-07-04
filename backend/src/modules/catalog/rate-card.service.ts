@@ -1,20 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateRateCardDto, UpdateRateCardDto } from './dto/create-rate-card.dto';
+import {
+  CreateRateCardDto,
+  UpdateRateCardDto,
+} from './dto/create-rate-card.dto';
 import { CatalogListQueryDto, SortOrder } from './dto/catalog-list-query.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 
 function serializeDbObject(obj: any): any {
   if (!obj) return obj;
   if (Array.isArray(obj)) {
-    return obj.map(item => serializeDbObject(item));
+    return obj.map((item) => serializeDbObject(item));
   }
   const serialized = { ...obj };
   for (const key of Object.keys(serialized)) {
     if (typeof serialized[key] === 'bigint') {
       serialized[key] = Number(serialized[key]);
-    } else if (serialized[key] && typeof serialized[key].toNumber === 'function') {
+    } else if (
+      serialized[key] &&
+      typeof serialized[key].toNumber === 'function'
+    ) {
       serialized[key] = serialized[key].toNumber();
-    } else if (typeof serialized[key] === 'object' && serialized[key] !== null && !(serialized[key] instanceof Date)) {
+    } else if (
+      typeof serialized[key] === 'object' &&
+      serialized[key] !== null &&
+      !(serialized[key] instanceof Date)
+    ) {
       serialized[key] = serializeDbObject(serialized[key]);
     }
   }
@@ -28,10 +38,12 @@ export class RateCardService {
   async create(priceBookId: number, createDto: CreateRateCardDto) {
     // Validate priceBookId foreign key
     const priceBook = await this.prisma.priceBook.findFirst({
-      where: { price_book_id: BigInt(priceBookId), is_active: true }
+      where: { price_book_id: BigInt(priceBookId), is_active: true },
     });
     if (!priceBook) {
-      throw new NotFoundException(`Price Book with ID ${priceBookId} not found`);
+      throw new NotFoundException(
+        `Price Book with ID ${priceBookId} not found`,
+      );
     }
 
     const created = await this.prisma.rateCard.create({
@@ -55,14 +67,22 @@ export class RateCardService {
   async findAllByPriceBook(priceBookId: number, query: CatalogListQueryDto) {
     // Validate priceBookId
     const priceBook = await this.prisma.priceBook.findFirst({
-      where: { price_book_id: BigInt(priceBookId), is_active: true }
+      where: { price_book_id: BigInt(priceBookId), is_active: true },
     });
     if (!priceBook) {
-      throw new NotFoundException(`Price Book with ID ${priceBookId} not found`);
+      throw new NotFoundException(
+        `Price Book with ID ${priceBookId} not found`,
+      );
     }
 
-    const search = query.search ? { item_name: { contains: query.search, mode: 'insensitive' as const } } : {};
-    const where = { price_book_id: BigInt(priceBookId), is_active: true, ...search };
+    const search = query.search
+      ? { item_name: { contains: query.search, mode: 'insensitive' as const } }
+      : {};
+    const where = {
+      price_book_id: BigInt(priceBookId),
+      is_active: true,
+      ...search,
+    };
     const total = await this.prisma.rateCard.count({ where });
 
     const page = Number(query.page) || 1;

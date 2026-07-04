@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import { approvalService } from '../services/approvalService';
 import { quotationService } from '../services/quotationService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import { 
-  LayoutDashboard, FileText, Files, LayoutTemplate, CheckSquare, Users, 
-  Settings, HelpCircle, Search, Bell, History as ActivityIcon, Printer,
-  CheckCircle, XCircle, Info, MessageSquare, Plus, Clock, Eye, Send, MapPin,
-  Loader, AlertTriangle, ShieldCheck, X
-} from 'lucide-react';
+import { FileText, History as ActivityIcon, CheckCircle, XCircle, Info, Clock, Send, MapPin, Loader, X } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
 const formatCurrency = (val: number) => {
@@ -23,7 +18,6 @@ const formatDate = (dateStr: string) => {
 };
 
 const Approvals = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { showToast } = useToast();
@@ -217,19 +211,14 @@ const Approvals = () => {
       <div className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
         <TopHeader />
 
-        {/* SCROLLABLE MAIN */}
         <main className="flex-1 overflow-y-auto p-8 pb-24">
           <div className="max-w-[1200px] mx-auto space-y-6">
             
-            {/* WORKFLOW PROGRESS TRACKER */}
             <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
               <div className="flex items-center justify-between relative">
-                {/* Connecting Line Base */}
                 <div className="absolute left-[10%] right-[10%] top-[24px] h-[3px] bg-gray-100 -z-10 rounded-full"></div>
-                {/* Active Connecting Line */}
                 <div className="absolute left-[10%] right-[10%] top-[24px] h-[3px] bg-gradient-to-r from-emerald-400 to-red-400 -z-10 rounded-full" style={{ width: approval.status === 'APPROVED' ? '80%' : isManagerDone ? '50%' : '20%' }}></div>
 
-                {/* Step 1: Draft */}
                 <div className="flex flex-col items-center gap-3 w-1/4">
                   <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-sm ring-4 ring-white">
                     <CheckCircle className="w-6 h-6" />
@@ -240,7 +229,6 @@ const Approvals = () => {
                   </div>
                 </div>
 
-                {/* Step 2: Manager Review */}
                 <div className="flex flex-col items-center gap-3 w-1/4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm ring-4 ring-white ${isManagerDone ? 'bg-emerald-500 text-white' : isManagerActive ? 'bg-red-50 text-red-600 border-2 border-red-200' : 'bg-gray-100 text-gray-400'}`}>
                     {isManagerDone ? <CheckCircle className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
@@ -251,7 +239,6 @@ const Approvals = () => {
                   </div>
                 </div>
 
-                {/* Step 3: Director Review */}
                 <div className="flex flex-col items-center gap-3 w-1/4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm ring-4 ring-white ${isDirectorDone ? 'bg-emerald-500 text-white' : isDirectorActive ? 'bg-red-50 text-red-600 border-2 border-red-200' : 'bg-gray-100 text-gray-400'}`}>
                     {isDirectorDone ? <CheckCircle className="w-6 h-6" /> : isDirectorActive ? <Clock className="w-6 h-6" /> : <FileText className="w-5 h-5" />}
@@ -262,7 +249,6 @@ const Approvals = () => {
                   </div>
                 </div>
 
-                {/* Step 4: Decision */}
                 <div className="flex flex-col items-center gap-3 w-1/4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm ring-4 ring-white ${approval.status === 'APPROVED' ? 'bg-emerald-500 text-white' : approval.status === 'REJECTED' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
                     <CheckCircle className="w-5 h-5" />
@@ -275,13 +261,10 @@ const Approvals = () => {
               </div>
             </div>
 
-            {/* TWO COLUMNS LAYOUT */}
             <div className="flex flex-col lg:flex-row gap-6">
               
-              {/* LEFT COLUMN (70%) */}
               <div className="flex-1 lg:w-[70%] space-y-6">
                 
-                {/* APPROVAL DETAILS CARD */}
                 <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <div className="flex items-start justify-between mb-8">
                     <div>
@@ -317,7 +300,6 @@ const Approvals = () => {
                     </div>
                   </div>
 
-                  {/* EXECUTIVE SUMMARY PANEL */}
                   <div className="bg-[#F8F5FF] rounded-[20px] p-6 flex gap-4 border border-[#F3E8FF]">
                     <div className="mt-0.5 shrink-0">
                       <Info className="w-5 h-5 text-red-600" />
@@ -331,7 +313,6 @@ const Approvals = () => {
                   </div>
                 </div>
 
-                {/* REVIEWER DISCUSSION CARD */}
                 <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <div className="flex items-center justify-between mb-8">
                     <h3 className="text-[18px] font-bold text-gray-900">Reviewer Discussion</h3>
@@ -374,7 +355,6 @@ const Approvals = () => {
                   </form>
                 </div>
 
-                {/* WORKFLOW HISTORY CARD */}
                 <div className="bg-white rounded-[28px] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-[#ECECF1]">
                   <h3 className="text-[18px] font-bold text-gray-900 flex items-center gap-2 mb-8">
                     <ActivityIcon className="w-5 h-5 text-gray-400" />
@@ -401,11 +381,9 @@ const Approvals = () => {
 
               </div>
 
-              {/* RIGHT COLUMN (30%) */}
               <div className="lg:w-[30%]">
                 <div className="sticky top-[24px] space-y-6">
                   
-                  {/* TAKE ACTION CARD */}
                   <div className="bg-white rounded-[28px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-[#ECECF1]">
                     <h3 className="text-[16px] font-bold text-gray-900 mb-6">Take Action</h3>
                     
@@ -453,7 +431,6 @@ const Approvals = () => {
                       </div>
                     )}
 
-                    {/* APPROVAL METRICS */}
                     <div className="mt-8">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[13px] font-semibold text-gray-500">Estimated SLA</span>
@@ -465,7 +442,6 @@ const Approvals = () => {
                     </div>
                   </div>
 
-                  {/* VENUE PREVIEW CARD */}
                   <div className="relative h-[180px] rounded-[24px] overflow-hidden group cursor-pointer shadow-sm">
                     <img 
                       src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" 
@@ -488,11 +464,9 @@ const Approvals = () => {
         </main>
       </div>
 
-      {/* Custom Action Modal Overlay */}
       {actionModal && actionModal.isOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-[24px] w-full max-w-[480px] shadow-2xl overflow-hidden border border-[#ECECF1] animate-in zoom-in-95 duration-200">
-            {/* Header */}
             <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between bg-gray-50/50">
               <h3 className="text-[18px] font-bold text-gray-900">
                 {actionModal.title}
@@ -505,7 +479,6 @@ const Approvals = () => {
               </button>
             </div>
 
-            {/* Body */}
             <div className="p-6 space-y-4">
               <p className="text-sm font-medium text-gray-500">
                 {actionModal.description}
@@ -526,7 +499,6 @@ const Approvals = () => {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="px-6 py-4 bg-gray-50/50 border-t border-[#ECECF1] flex justify-end gap-3">
               <button
                 onClick={() => setActionModal(null)}

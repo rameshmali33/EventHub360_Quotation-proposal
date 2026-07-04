@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
@@ -6,19 +6,11 @@ import Pagination from '../components/Pagination';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { quotationService } from '../services/quotationService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import { 
-  Loader, History, Play, Filter, MoreHorizontal, ChevronLeft, ChevronRight,
-  Edit2, Copy, Edit3, Archive, Trash2, Download, Share2
-} from 'lucide-react';
+import { Loader, History, Play, Filter, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
-};
-
-const formatDate = (dateStr: string) => {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
 const formatTime = (dateStr: string) => {
@@ -91,7 +83,6 @@ const DraftManagementCenter = () => {
         <main className="flex-1 overflow-y-auto p-8 pb-32" onClick={() => setActiveDropdown(null)}>
           <div className="max-w-[1200px] mx-auto space-y-8">
             
-            {/* Resume Most Recent Card */}
             {recentDraft && (
               <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] overflow-hidden flex flex-col md:flex-row relative">
                 <div className="p-8 md:w-2/3 flex flex-col justify-between">
@@ -163,7 +154,6 @@ const DraftManagementCenter = () => {
               </div>
             )}
 
-            {/* List Section Header */}
             <div className="flex items-end justify-between">
               <div>
                 <h2 className="text-[24px] font-bold text-gray-900">Your Drafts</h2>
@@ -179,7 +169,6 @@ const DraftManagementCenter = () => {
               </div>
             </div>
 
-            {/* Drafts Table */}
             <div className="bg-white rounded-[24px] shadow-sm border border-[#ECECF1] overflow-hidden min-h-[300px]">
               {loading ? (
                 <div className="flex items-center justify-center py-20">
@@ -255,7 +244,6 @@ const DraftManagementCenter = () => {
                                 <MoreHorizontal className="w-5 h-5" />
                               </button>
                               
-                              {/* Actions Dropdown */}
                               {activeDropdown === draft.quotation_id && (
                                 <div className="absolute right-8 top-10 w-[200px] bg-white rounded-[16px] shadow-lg border border-[#ECECF1] py-2 z-10 animate-in fade-in zoom-in-95 duration-200">
                                   <button 

@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
 import { useToast } from '../context/ToastContext';
-import { 
-  HelpCircle, BookOpen, MessageCircle, FileText, Search, ArrowRight,
-  Send, User, CheckCircle2, ChevronDown, ChevronUp, AlertCircle, Plus, X, Phone, Mail
-} from 'lucide-react';
+import { HelpCircle, FileText, Search, ArrowRight, Send, User, CheckCircle2, ChevronDown, ChevronUp, AlertCircle, Plus, X, Phone, Mail } from 'lucide-react';
 
 interface FAQItem {
   question: string;
@@ -64,7 +61,6 @@ const FAQS_DATABASE: FAQItem[] = [
 const INITIAL_TICKETS: SupportTicket[] = [];
 
 const SupportCenter = () => {
-  const navigate = useNavigate();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'faq' | 'tickets' | 'contact'>('faq');
   
@@ -208,7 +204,6 @@ const SupportCenter = () => {
         <main className="flex-1 overflow-y-auto p-8 relative">
           <div className="max-w-[1200px] mx-auto space-y-8">
             
-            {/* Header Banner */}
             <div className="bg-gradient-to-r from-red-700 to-orange-400 rounded-[32px] p-12 text-white relative overflow-hidden shadow-sm">
               <div className="absolute top-0 right-0 p-8 opacity-10">
                 <HelpCircle className="w-48 h-48" />
@@ -235,7 +230,6 @@ const SupportCenter = () => {
               </div>
             </div>
 
-            {/* Tab Navigation */}
             <div className="flex border-b border-[#ECECF1] gap-6">
               <button 
                 onClick={() => setActiveTab('faq')}
@@ -260,9 +254,7 @@ const SupportCenter = () => {
               </button>
             </div>
 
-            {/* Tab Contents */}
             <div>
-              {/* TAB 1: FAQ / KNOWLEDGE BASE */}
               {activeTab === 'faq' && (
                 <div className="space-y-6">
                   <h2 className="text-[20px] font-bold text-gray-900">Frequently Asked Questions</h2>
@@ -311,7 +303,6 @@ const SupportCenter = () => {
                 </div>
               )}
 
-              {/* TAB 2: SUPPORT TICKETS */}
               {activeTab === 'tickets' && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -392,10 +383,8 @@ const SupportCenter = () => {
                 </div>
               )}
 
-              {/* TAB 3: CONTACT SUPPORT & DOCS */}
               {activeTab === 'contact' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Left panel: Form */}
                   <div className="lg:col-span-2 bg-white rounded-[24px] p-8 border border-[#ECECF1] shadow-sm">
                     <h2 className="text-[20px] font-bold text-gray-900 mb-2">Send Message to Agent</h2>
                     <p className="text-sm text-gray-500 mb-6">Can't find what you need in the FAQs? Submit a custom inquiry below.</p>
@@ -453,9 +442,7 @@ const SupportCenter = () => {
                     )}
                   </div>
 
-                  {/* Right panel: Downloads & Contact Details */}
                   <div className="space-y-6">
-                    {/* Downloads Card */}
                     <div className="bg-white rounded-[24px] p-6 border border-[#ECECF1] shadow-sm">
                       <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <FileText className="w-5 h-5 text-red-600" />
@@ -493,7 +480,6 @@ const SupportCenter = () => {
                       </div>
                     </div>
 
-                    {/* Direct Contact Card */}
                     <div className="bg-[#FFF5F5] rounded-[24px] p-6 border border-red-100 shadow-sm space-y-4">
                       <h3 className="text-lg font-bold text-red-900">Immediate Escalation</h3>
                       <p className="text-xs leading-relaxed text-red-700/80">Need to speak with an engineer immediately? Contact our emergency system operations desk.</p>
@@ -515,7 +501,6 @@ const SupportCenter = () => {
 
           </div>
 
-          {/* CREATE TICKET MODAL */}
           {showCreateTicketModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
               <div className="bg-white rounded-[24px] w-full max-w-[550px] p-8 shadow-2xl border border-[#ECECF1] relative animate-in fade-in zoom-in-95 duration-200">
@@ -603,10 +588,8 @@ const SupportCenter = () => {
             </div>
           )}
 
-          {/* CHAT DRAWER FOR TICKET */}
           {selectedTicket && (
             <div className="fixed inset-y-0 right-0 z-50 w-[450px] bg-white shadow-2xl border-l border-[#ECECF1] flex flex-col animate-in slide-in-from-right duration-300">
-              {/* Drawer Header */}
               <div className="p-6 border-b border-[#ECECF1] flex items-center justify-between">
                 <div>
                   <span className="text-xs text-gray-400 font-bold tracking-widest">{selectedTicket.id}</span>
@@ -620,7 +603,6 @@ const SupportCenter = () => {
                 </button>
               </div>
 
-              {/* Chat Messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
                 {selectedTicket.messages.map((m, idx) => {
                   const isUser = m.sender === 'user';
@@ -645,7 +627,6 @@ const SupportCenter = () => {
                 })}
               </div>
 
-              {/* Chat Input */}
               <form onSubmit={handleSendMessage} className="p-4 border-t border-[#ECECF1] bg-white">
                 <div className="relative">
                   <input 

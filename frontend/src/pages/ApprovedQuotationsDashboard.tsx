@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
@@ -6,10 +6,7 @@ import Pagination from '../components/Pagination';
 import { quotationService } from '../services/quotationService';
 import { qtnDashboardService } from '../services/qtnDashboardService';
 import { getQuotationClientInfo } from '../utils/quotationDisplay';
-import { 
-  Loader, CheckCircle2, TrendingUp, Search, Filter, Printer, 
-  Download, FileText, MoreVertical, Eye
-} from 'lucide-react';
+import { Loader, CheckCircle2, TrendingUp, Search, Filter, Eye } from 'lucide-react';
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
@@ -84,7 +81,6 @@ const ApprovedQuotationsDashboard = () => {
               <p className="text-[15px] text-gray-500 mt-1">Review successfully approved quotations ready for proposal generation.</p>
             </div>
 
-            {/* Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {metrics.map((metric: any, idx: any) => (
                 <div key={idx} className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1]">
@@ -100,7 +96,6 @@ const ApprovedQuotationsDashboard = () => {
               ))}
             </div>
 
-            {/* Approved Table */}
             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-[#ECECF1] min-h-[350px] flex flex-col justify-between">
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -170,9 +165,7 @@ const ApprovedQuotationsDashboard = () => {
                                   <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="View" onClick={() => navigate(`/quotation-builder?id=${quote.quotation_id}`)}>
                                     <Eye className="w-4 h-4" />
                                   </button>
-                                  <button className="p-2 text-gray-400 hover:text-gray-900 transition-colors" title="Print" onClick={e => e.stopPropagation()}>
-                                    <Printer className="w-4 h-4" />
-                                  </button>
+
                                   <button 
                                     onClick={() => navigate(`/quotation-builder?id=${quote.quotation_id}&generate=true`)}
                                     className="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-[12px] font-bold hover:bg-red-100 transition-colors ml-2"

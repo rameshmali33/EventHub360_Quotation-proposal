@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
-import { 
-  Calculator, Shield, IndianRupee, Percent, Receipt, Plus, Edit2, 
-  ChevronDown, Save, X, AlertTriangle, CheckCircle2, UserRound
-} from 'lucide-react';
+import { Calculator, Shield, IndianRupee, Percent, Receipt, Plus, Edit2, ChevronDown, Save, AlertTriangle, CheckCircle2, UserRound, ListChecks, BookOpenCheck, Layers3 } from 'lucide-react';
 
 // Reusable Switch Component
 const ToggleSwitch = ({ enabled, onChange  }: any) => (
@@ -90,10 +87,8 @@ const SystemSettings = () => {
 
             <div className="flex gap-6 flex-col lg:flex-row">
               
-              {/* Left Column: Numbering & Currency */}
               <div className="w-full lg:w-[360px] flex flex-col gap-6">
                 
-                {/* Automated Numbering Card */}
                 <div 
                   className="bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#ECECF1] cursor-pointer hover:border-red-200 transition-colors"
                   onClick={() => navigate('/settings/automated-numbering')}
@@ -143,7 +138,6 @@ const SystemSettings = () => {
                   </div>
                 </div>
 
-                {/* Currency Card */}
                 <div 
                   className="bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#ECECF1] cursor-pointer hover:border-red-200 transition-colors"
                   onClick={() => navigate('/settings/currency')}
@@ -178,10 +172,8 @@ const SystemSettings = () => {
 
               </div>
 
-              {/* Right Column: Approval Rules, Tax, Service Charge */}
               <div className="flex-1 flex flex-col gap-6">
                 
-                {/* Approval Workflow Rules */}
                 <div className="bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#ECECF1]">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
@@ -246,10 +238,8 @@ const SystemSettings = () => {
                   </div>
                 </div>
 
-                {/* Tax & Service Charge Row */}
                 <div className="flex gap-6 flex-col sm:flex-row">
                   
-                  {/* Tax Config */}
                   <div 
                     className="flex-1 bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#ECECF1] cursor-pointer hover:border-red-200 transition-colors"
                     onClick={() => navigate('/settings/tax-configuration')}
@@ -288,7 +278,6 @@ const SystemSettings = () => {
                     </div>
                   </div>
 
-                  {/* Service Charge */}
                   <div 
                     className="flex-1 bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#ECECF1] cursor-pointer hover:border-red-200 transition-colors"
                     onClick={() => navigate('/settings/service-charge')}
@@ -327,7 +316,6 @@ const SystemSettings = () => {
 
             </div>
 
-            {/* Advanced Settings Row */}
             <div className="mt-8 pt-8 border-t border-[#ECECF1]">
               <h2 className="text-[18px] font-bold text-gray-900 mb-6">Global & Advanced Configurations</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -380,6 +368,45 @@ const SystemSettings = () => {
                   </div>
                 </button>
 
+                <button
+                  onClick={() => navigate('/settings/price-books')}
+                  className="bg-white p-6 rounded-[24px] shadow-sm border border-[#ECECF1] text-left hover:border-red-200 transition-colors flex flex-col gap-4"
+                >
+                  <div className="w-10 h-10 rounded-[12px] bg-amber-50 flex items-center justify-center text-amber-600">
+                    <BookOpenCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-bold text-gray-900">Price Books</h3>
+                    <p className="text-[12px] text-gray-500 mt-1">Price book master and validity</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate('/settings/catalog-categories')}
+                  className="bg-white p-6 rounded-[24px] shadow-sm border border-[#ECECF1] text-left hover:border-red-200 transition-colors flex flex-col gap-4"
+                >
+                  <div className="w-10 h-10 rounded-[12px] bg-purple-50 flex items-center justify-center text-purple-600">
+                    <Layers3 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-bold text-gray-900">Price Book Categories</h3>
+                    <p className="text-[12px] text-gray-500 mt-1">Category master and ordering</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate('/settings/quotation-statuses')}
+                  className="bg-white p-6 rounded-[24px] shadow-sm border border-[#ECECF1] text-left hover:border-red-200 transition-colors flex flex-col gap-4"
+                >
+                  <div className="w-10 h-10 rounded-[12px] bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <ListChecks className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-bold text-gray-900">Quotation Statuses</h3>
+                    <p className="text-[12px] text-gray-500 mt-1">Status master and availability</p>
+                  </div>
+                </button>
+
                 <button 
                   onClick={() => navigate('/settings/audit-logs')}
                   className="bg-white p-6 rounded-[24px] shadow-sm border border-[#ECECF1] text-left hover:border-red-200 transition-colors flex flex-col gap-4"
@@ -398,7 +425,6 @@ const SystemSettings = () => {
           </div>
         </main>
 
-        {/* Floating Bottom Bar for Save / Discard */}
         <div className={`fixed bottom-0 right-0 left-[260px] bg-white border-t border-[#ECECF1] shadow-[0_-4px_24px_rgba(0,0,0,0.02)] p-4 flex justify-end gap-4 transition-transform duration-300 z-20 ${hasChanges ? 'translate-y-0' : 'translate-y-full'}`}>
           <button 
             onClick={handleDiscard}
@@ -421,7 +447,6 @@ const SystemSettings = () => {
           </button>
         </div>
 
-        {/* Discard Confirmation Modal */}
         {showDiscardModal && (
           <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center">
             <div className="bg-white rounded-[24px] p-8 w-full max-w-md shadow-xl border border-[#ECECF1]">

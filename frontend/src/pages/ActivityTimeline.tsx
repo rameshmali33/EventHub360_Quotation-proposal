@@ -1,14 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
+
 import Sidebar from '../components/Sidebar';
 import TopHeader from '../components/TopHeader';
-import { 
-  Activity, CheckCircle2, Send, FileEdit, User, Search, Filter
-} from 'lucide-react';
+import { User, Search, Filter } from 'lucide-react';
 
 const ActivityTimeline = () => {
-  const navigate = useNavigate();
-
   const activities: any[] = [];
 
   return (

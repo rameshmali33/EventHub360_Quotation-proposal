@@ -73,13 +73,14 @@ export interface TopSalesExecutive {
 
 @Injectable()
 export class QtnDashboardService {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async getStats(): Promise<DashboardStats> {
+  async getStats(createdBy?: number): Promise<DashboardStats> {
     const quotations = await this.prisma.quotation.findMany({
-      where: { is_active: true }
+      where: {
+        is_active: true,
+        ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+      },
     });
 
     const total = quotations.length;
@@ -104,19 +105,32 @@ export class QtnDashboardService {
       where: { status: { in: ['SENT', 'VIEWED'] } },
       select: { quotation_id: true },
     });
-    const sentProposalQuoteIds = new Set(sentProposalRecords.map(item => Number(item.quotation_id)));
+    const sentProposalQuoteIds = new Set(
+      sentProposalRecords.map((item) => Number(item.quotation_id)),
+    );
 
-    const draft = quotations.filter(q => q.status === 'DRAFT').length;
-    const sent = quotations.filter(q => q.status === 'SENT' || sentProposalQuoteIds.has(Number(q.quotation_id))).length;
-    const approved = quotations.filter(q => q.status === 'APPROVED').length;
-    const accepted = quotations.filter(q => q.status === 'ACCEPTED').length;
-    const approvedOrAccepted = quotations.filter(q => ['APPROVED', 'ACCEPTED'].includes(q.status));
-    const rejected = quotations.filter(q => q.status === 'REJECTED').length;
-    const expired = quotations.filter(q => q.status === 'EXPIRED').length;
-    const pending = quotations.filter(q => q.status === 'PENDING_APPROVAL').length;
-    
-    const totalRevenue = approvedOrAccepted.reduce((sum, q) => sum + Number(q.total || 0), 0);
-    const averageDealValue = quotations.reduce((sum, q) => sum + Number(q.total || 0), 0) / total;
+    const draft = quotations.filter((q) => q.status === 'DRAFT').length;
+    const sent = quotations.filter(
+      (q) =>
+        q.status === 'SENT' || sentProposalQuoteIds.has(Number(q.quotation_id)),
+    ).length;
+    const approved = quotations.filter((q) => q.status === 'APPROVED').length;
+    const accepted = quotations.filter((q) => q.status === 'ACCEPTED').length;
+    const approvedOrAccepted = quotations.filter((q) =>
+      ['APPROVED', 'ACCEPTED'].includes(q.status),
+    );
+    const rejected = quotations.filter((q) => q.status === 'REJECTED').length;
+    const expired = quotations.filter((q) => q.status === 'EXPIRED').length;
+    const pending = quotations.filter(
+      (q) => q.status === 'PENDING_APPROVAL',
+    ).length;
+
+    const totalRevenue = approvedOrAccepted.reduce(
+      (sum, q) => sum + Number(q.total || 0),
+      0,
+    );
+    const averageDealValue =
+      quotations.reduce((sum, q) => sum + Number(q.total || 0), 0) / total;
     const acceptanceRate = (approvedOrAccepted.length / total) * 100;
 
     const totalMarginPercent = quotations.reduce((sum, q) => {
@@ -143,67 +157,124 @@ export class QtnDashboardService {
     };
   }
 
-  async getMonthlyQuotations(): Promise<MonthlyQuotation[]> {
+  async getMonthlyQuotations(
+    createdBy?: number,
+    months = 12,
+  ): Promise<MonthlyQuotation[]> {
+    const allowedRanges = [3, 6, 12, 24];
+    const selectedMonths = allowedRanges.includes(months) ? months : 12;
+    const now = new Date();
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth();
+    const startDate = new Date(
+      Date.UTC(currentYear, currentMonth - selectedMonths + 1, 1),
+    );
+
     const quotations = await this.prisma.quotation.findMany({
-      where: { is_active: true }
+      where: {
+        is_active: true,
+        created_at: { gte: startDate },
+        ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+      },
+      orderBy: { created_at: 'asc' },
     });
 
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const groups: { [key: string]: MonthlyQuotation } = {};
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const groups = new Map<string, MonthlyQuotation>();
+    const orderedKeys: string[] = [];
 
-    quotations.forEach(q => {
-      const date = new Date(q.created_at);
-      const key = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+    for (let offset = selectedMonths - 1; offset >= 0; offset -= 1) {
+      const bucketDate = new Date(
+        Date.UTC(currentYear, currentMonth - offset, 1),
+      );
+      const year = bucketDate.getUTCFullYear();
+      const monthIndex = bucketDate.getUTCMonth();
+      const key = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+      orderedKeys.push(key);
+      groups.set(key, {
+        month: `${monthNames[monthIndex]} ${year}`,
+        created: 0,
+        sent: 0,
+        accepted: 0,
+        rejected: 0,
+        revenue: 0,
+      });
+    }
 
-      if (!groups[key]) {
-        groups[key] = { month: key, created: 0, sent: 0, accepted: 0, rejected: 0, revenue: 0 };
+    quotations.forEach((quotation) => {
+      const date = new Date(quotation.created_at);
+      const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+      const group = groups.get(key);
+      if (!group) return;
+
+      group.created += 1;
+      if (quotation.status === 'SENT') group.sent += 1;
+      if (['APPROVED', 'ACCEPTED'].includes(quotation.status)) {
+        group.accepted += 1;
+        group.revenue += Number(quotation.total || 0);
       }
-
-      groups[key].created++;
-      if (q.status === 'SENT') groups[key].sent++;
-      if (['APPROVED', 'ACCEPTED'].includes(q.status)) {
-        groups[key].accepted++;
-        groups[key].revenue += Number(q.total || 0);
-      }
-      if (q.status === 'REJECTED') groups[key].rejected++;
+      if (quotation.status === 'REJECTED') group.rejected += 1;
     });
 
-    return Object.values(groups);
+    return orderedKeys.map((key) => groups.get(key)!);
   }
-
-  async getStatusSummary(): Promise<StatusSummary[]> {
+  async getStatusSummary(createdBy?: number): Promise<StatusSummary[]> {
     const quotations = await this.prisma.quotation.findMany({
-      where: { is_active: true }
+      where: {
+        is_active: true,
+        ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+      },
     });
 
     const counts: { [status: string]: number } = {};
-    quotations.forEach(q => {
+    quotations.forEach((q) => {
       counts[q.status] = (counts[q.status] || 0) + 1;
     });
 
     const total = quotations.length;
     if (total === 0) return [];
 
-    return Object.keys(counts).map(status => ({
+    return Object.keys(counts).map((status) => ({
       status,
       count: counts[status],
       percentage: parseFloat(((counts[status] / total) * 100).toFixed(2)),
     }));
   }
 
-  async getConversionFunnel(): Promise<ConversionFunnel> {
+  async getConversionFunnel(createdBy?: number): Promise<ConversionFunnel> {
     const quotations = await this.prisma.quotation.findMany({
-      where: { is_active: true }
+      where: {
+        is_active: true,
+        ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+      },
     });
 
     const created = quotations.length;
-    const sent = quotations.filter(q => ['SENT', 'APPROVED', 'ACCEPTED', 'REJECTED'].includes(q.status)).length;
-    const accepted = quotations.filter(q => ['APPROVED', 'ACCEPTED'].includes(q.status)).length;
+    const sent = quotations.filter((q) =>
+      ['SENT', 'APPROVED', 'ACCEPTED', 'REJECTED'].includes(q.status),
+    ).length;
+    const accepted = quotations.filter((q) =>
+      ['APPROVED', 'ACCEPTED'].includes(q.status),
+    ).length;
     const bookings = accepted;
 
-    const leadCount = await this.prisma.lead.count({
-      where: { is_active: true }
-    });
+    const leadCount = createdBy
+      ? new Set(quotations.map((quotation) => quotation.lead_id.toString()))
+          .size
+      : await this.prisma.lead.count({ where: { is_active: true } });
 
     return {
       leads: leadCount,
@@ -214,23 +285,29 @@ export class QtnDashboardService {
     };
   }
 
-  async getPendingApprovals(): Promise<PendingApprovalItem[]> {
+  async getPendingApprovals(
+    createdBy?: number,
+  ): Promise<PendingApprovalItem[]> {
     const pendingApprovals = await this.prisma.quoteApproval.findMany({
-      where: { status: 'PENDING', is_active: true },
+      where: {
+        status: 'PENDING',
+        is_active: true,
+        ...(createdBy ? { quotation: { created_by: BigInt(createdBy) } } : {}),
+      },
       include: {
         quotation: {
           include: {
-            lead: true
-          }
-        }
-      }
+            lead: true,
+          },
+        },
+      },
     });
 
     const items: PendingApprovalItem[] = [];
     for (const app of pendingApprovals) {
       const firstHistory = await this.prisma.quoteApprovalHistory.findFirst({
         where: { approval_id: app.approval_id, action: 'REQUESTED' },
-        orderBy: { created_at: 'asc' }
+        orderBy: { created_at: 'asc' },
       });
 
       let discountPercent = 0;
@@ -238,7 +315,7 @@ export class QtnDashboardService {
       if (firstHistory) {
         const discMatch = firstHistory.notes?.match(/Discount:\s*([\d.]+)/);
         if (discMatch) discountPercent = parseFloat(discMatch[1]);
-        
+
         const notesMatch = firstHistory.notes?.match(/Notes:\s*(.*)$/);
         if (notesMatch) notes = notesMatch[1];
         else notes = firstHistory.notes || notes;
@@ -257,7 +334,9 @@ export class QtnDashboardService {
         approvalId: Number(app.approval_id),
         quotationId: Number(app.quotation_id),
         quoteRef: `QTN-${app.quotation_id.toString().padStart(5, '0')}`,
-        clientName: app.quotation?.lead?.name || `Lead Account #${app.quotation?.lead_id}`,
+        clientName:
+          app.quotation?.lead?.name ||
+          `Lead Account #${app.quotation?.lead_id}`,
         total: app.quotation ? Number(app.quotation.total) : 0,
         discountPercent,
         marginPercent: parseFloat(marginPercent.toFixed(2)),
@@ -270,17 +349,22 @@ export class QtnDashboardService {
     return items;
   }
 
-  async getRecentQuotations(): Promise<RecentQuotationItem[]> {
+  async getRecentQuotations(
+    createdBy?: number,
+  ): Promise<RecentQuotationItem[]> {
     const quotations = await this.prisma.quotation.findMany({
-      where: { is_active: true },
+      where: {
+        is_active: true,
+        ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+      },
       orderBy: { created_at: 'desc' },
       take: 10,
       include: {
-        lead: true
-      }
+        lead: true,
+      },
     });
 
-    return quotations.map(q => ({
+    return quotations.map((q) => ({
       quotationId: Number(q.quotation_id),
       quoteRef: `QTN-${q.quotation_id.toString().padStart(5, '0')}`,
       clientName: q.lead?.name || `Lead Account #${q.lead_id}`,
@@ -291,14 +375,22 @@ export class QtnDashboardService {
     }));
   }
 
-  async getTopSalesExecutives(): Promise<TopSalesExecutive[]> {
+  async getTopSalesExecutives(
+    createdBy?: number,
+  ): Promise<TopSalesExecutive[]> {
     const quotations = await this.prisma.quotation.findMany({
-      where: { is_active: true },
+      where: {
+        is_active: true,
+        ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+      },
       include: {
         tenant: {
           include: {
             users: {
-              where: { is_active: true },
+              where: {
+                is_active: true,
+                ...(createdBy ? { created_by: BigInt(createdBy) } : {}),
+              },
               select: {
                 user_id: true,
                 first_name: true,
@@ -314,14 +406,23 @@ export class QtnDashboardService {
       return [];
     }
 
-    const executivesMap: { [userId: number]: { name: string; created: number; accepted: number; revenue: number } } = {};
+    const executivesMap: {
+      [userId: number]: {
+        name: string;
+        created: number;
+        accepted: number;
+        revenue: number;
+      };
+    } = {};
 
-    quotations.forEach(q => {
+    quotations.forEach((q) => {
       const execId = Number(q.created_by || 0);
       if (!execId) return;
 
-      const user = q.tenant.users.find(u => Number(u.user_id) === execId);
-      const name = user ? `${user.first_name} ${user.last_name}` : `User #${execId}`;
+      const user = q.tenant.users.find((u) => Number(u.user_id) === execId);
+      const name = user
+        ? `${user.first_name} ${user.last_name}`
+        : `User #${execId}`;
 
       if (!executivesMap[execId]) {
         executivesMap[execId] = { name, created: 0, accepted: 0, revenue: 0 };
@@ -335,10 +436,11 @@ export class QtnDashboardService {
     });
 
     return Object.keys(executivesMap)
-      .map(id => {
+      .map((id) => {
         const execId = Number(id);
         const data = executivesMap[execId];
-        const rate = data.created > 0 ? (data.accepted / data.created) * 100 : 0;
+        const rate =
+          data.created > 0 ? (data.accepted / data.created) * 100 : 0;
         return {
           userId: execId,
           name: data.name,
@@ -348,9 +450,10 @@ export class QtnDashboardService {
           acceptanceRate: parseFloat(rate.toFixed(2)),
         };
       })
-      .sort((a, b) => b.revenue - a.revenue || b.quotationsCreated - a.quotationsCreated)
+      .sort(
+        (a, b) =>
+          b.revenue - a.revenue || b.quotationsCreated - a.quotationsCreated,
+      )
       .slice(0, 5);
   }
 }
-
-

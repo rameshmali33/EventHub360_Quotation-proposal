@@ -1,13 +1,25 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 export class CreateRateCardDto {
-  @ApiProperty({ description: 'The rate card item name', example: 'Sound System Setup' })
+  @ApiProperty({
+    description: 'The rate card item name',
+    example: 'Sound System Setup',
+  })
   @IsString()
   @IsNotEmpty()
   itemName: string;
 
-  @ApiProperty({ description: 'Type/Category of the rate card item', example: 'AV_EQUIPMENT' })
+  @ApiProperty({
+    description: 'Type/Category of the rate card item',
+    example: 'AV_EQUIPMENT',
+  })
   @IsString()
   @IsNotEmpty()
   itemType: string;
@@ -32,12 +44,20 @@ export class CreateRateCardDto {
   @IsNotEmpty()
   cost: number;
 
-  @ApiPropertyOptional({ description: 'Tax percentage applied to this item', example: 18, default: 0 })
+  @ApiPropertyOptional({
+    description: 'Tax percentage applied to this item',
+    example: 18,
+    default: 0,
+  })
   @IsNumber()
   @IsOptional()
   taxPercent?: number = 0;
 
-  @ApiPropertyOptional({ description: 'Active status of the rate card item', example: true, default: true })
+  @ApiPropertyOptional({
+    description: 'Active status of the rate card item',
+    example: true,
+    default: true,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean = true;

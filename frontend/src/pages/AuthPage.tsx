@@ -1,18 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import {
-  ArrowRight,
-  Building2,
-  CalendarCheck2,
-  Check,
-  Eye,
-  EyeOff,
-  FileCheck2,
-  LockKeyhole,
-  Mail,
-  ShieldCheck,
-  User,
-} from 'lucide-react';
+import { ArrowRight, Building2, CalendarCheck2, Check, Eye, EyeOff, FileCheck2, LockKeyhole, Mail, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface AuthPageProps {
@@ -154,7 +142,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                 {isSignUp ? 'Start with EventHub360' : 'Sign in to your account'}
               </h2>
               <p className="mt-2 text-[14px] font-medium text-gray-500">
-                {isSignUp ? 'Set up your organization and administrator account.' : 'Continue to your quotation management workspace.'}
+                {isSignUp ? 'Create a secure client account for your organization.' : 'Continue to your quotation management workspace.'}
               </p>
             </div>
 
@@ -215,10 +203,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
                   </label>
                 </>
               ) : (
-                <label className="flex cursor-pointer items-center gap-2 text-[13px] font-semibold text-gray-600">
-                  <input type="checkbox" checked={form.remember} onChange={(e) => update('remember', e.target.checked)} className="h-4 w-4 accent-red-600" />
-                  Remember my email
-                </label>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="flex cursor-pointer items-center gap-2 text-[13px] font-semibold text-gray-600">
+                    <input type="checkbox" checked={form.remember} onChange={(e) => update('remember', e.target.checked)} className="h-4 w-4 accent-red-600" />
+                    Remember my email
+                  </label>
+                  <Link to="/forgot-password" className="text-[13px] font-extrabold text-red-600 hover:text-red-700">Forgot password?</Link>
+                </div>
               )}
 
               <button

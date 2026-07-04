@@ -1,18 +1,33 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateQuotationLineDto {
-  @ApiProperty({ description: 'The line item type (e.g. PACKAGE, RATE_CARD, CUSTOM)', example: 'PACKAGE' })
+  @ApiProperty({
+    description: 'The line item type (e.g. PACKAGE, RATE_CARD, CUSTOM)',
+    example: 'PACKAGE',
+  })
   @IsString()
   @IsNotEmpty()
   item_type: string; // 'PACKAGE', 'RATE_CARD', 'CUSTOM'
 
-  @ApiProperty({ description: 'Referenced package or rate card ID', example: 1 })
+  @ApiProperty({
+    description: 'Referenced package or rate card ID',
+    example: 1,
+  })
   @IsInt()
   @IsNotEmpty()
   ref_id: number | bigint;
 
-  @ApiProperty({ description: 'Description of the service or package line', example: 'Gold Wedding Stage Setup' })
+  @ApiProperty({
+    description: 'Description of the service or package line',
+    example: 'Gold Wedding Stage Setup',
+  })
   @IsString()
   @IsNotEmpty()
   description: string;
